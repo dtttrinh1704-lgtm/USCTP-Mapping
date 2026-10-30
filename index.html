@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supply Chain Journey Map - Miễn Phí 100%</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Leaflet CSS & JS (Thư viện bản đồ mã nguồn mở miễn phí, không cần API Key) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    
+    /* Animation cho hiệu ứng nhịp đập của trạm */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.6); opacity: 0.9; }
+      80%, 100% { transform: scale(2.4); opacity: 0; }
+    }
+    .pulse-marker {
+      position: relative;
+    }
+    .pulse-marker::after {
+      content: '';
+      position: absolute;
+      top: -6px; left: -6px; right: -6px; bottom: -6px;
+      border-radius: 9999px;
+      background: currentColor;
+      animation: pulse-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+      z-index: -1;
+    }
+
+    /* Hiệu ứng nét đứt chạy dọc theo tuyến đường */
+    @keyframes dashFlow {
+      to {
+        stroke-dashoffset: -40;
+      }
+    }
+    .route-animated {
+      animation: dashFlow 1.4s linear infinite;
+    }
+
+    /* Tùy chỉnh popup leaflet đẹp mắt */
+    .leaflet-popup-content-wrapper {
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 12px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      border: 1px solid #334155;
+      padding: 4px;
+    }
+    .leaflet-popup-tip {
+      background: #0f172a;
+    }
+
+    /* Đảm bảo khung Leaflet luôn lấp đầy không gian */
+    #map {
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      background-color: #0b1120;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 flex flex-col h-screen overflow-hidden">
+
+  <!-- Header thanh công cụ trên cùng -->
+  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 z-10 shadow-lg">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+        <i class="fa-solid fa-route text-lg"></i>
+      </div>
+      <div>
+        <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+          Hành Trình Chuỗi Cung Ứng
+          <span class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium px-2 py-0.5 rounded-full">100% Free / Open-Source</span>
+        </h1>
+        <p class="text-xs text-slate-400">Memphis (USA) &rarr; Ninh Ba (China) &rarr; Hải Phòng (Vietnam)</p>
+      </div>
+    </div>
+
+    <!-- Nút điều khiển tương tác nhanh -->
+    <div class="flex items-center space-x-2">
+      <button id="btnPlay" class="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs transition-all shadow-md hover:shadow-sky-500/25 flex items-center gap-2">
+        <i class="fa-solid fa-play" id="playIcon"></i> <span id="playText">Bắt Đầu Mô Phỏng</span>
+      </button>
+      <button id="btnReset" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs transition border border-slate-700 flex items-center gap-1.5" title="Xem toàn cảnh">
+        <i class="fa-solid fa-expand"></i> <span>Toàn cảnh</span>
+      </button>
+
+      <!-- Bộ chọn loại bản đồ miễn phí -->
+      <select id="tileSelector" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-2 outline-none focus:border-sky-500 cursor-pointer">
+        <option value="dark">Chế độ Tối (Dark)</option>
+        <option value="osm">Bản đồ Chuẩn (OSM)</option>
+        <option value="satellite">Ảnh Vệ Tinh (Satellite)</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Phần hiển thị chính: Bản đồ + Bảng hành trình -->
+  <main class="relative flex-1 w-full h-full overflow-hidden">
+    <!-- Map Container -->
+    <div id="map" class="w-full h-full"></div>
+
+    <!-- Card hành trình cố định góc trái màn hình -->
+    <div class="absolute top-4 left-4 z-[1000] w-[calc(100%-2rem)] sm:w-96 max-h-[calc(100%-2rem)] overflow-y-auto bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl p-4 sm:p-5 transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div>
+          <span class="text-[11px] font-semibold tracking-wider text-sky-400 uppercase">Tiến Độ Hành Trình</span>
+          <h2 class="text-sm font-bold text-slate-100">Lộ Trình Vật Liệu Từng Chặng</h2>
+        </div>
+        <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md font-mono" id="currentMilestoneLabel">Sẵn sàng</span>
+      </div>
+
+      <!-- Danh sách các chặng (Stages) -->
+      <div class="mt-4 space-y-4">
+        
+        <!-- Chặng 1: Memphis (Nguyên liệu thô) -->
+        <div id="step-card-0" class="cursor-pointer transition-all p-3 rounded-xl border border-sky-500/40 bg-sky-500/10 hover:border-sky-400 group">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center font-bold text-xs shrink-0">
+              <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-100 group-hover:text-sky-300">1. Xuất phát: Memphis, USA</span>
+                <span class="text-[10px] text-amber-400 font-medium bg-amber-500/10 px-1.5 py-0.5 rounded">Raw Material</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed">
+                Nguyên vật liệu thô (bông & sợi tổng hợp) được thu mua và đóng gói tại trung tâm logistics Memphis, Tennessee.
+              </p>
+              <div class="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
+                <span><i class="fa-solid fa-calendar-day mr-1"></i>01/10/2026</span>
+                <span><i class="fa-solid fa-truck-front mr-1"></i>Đường bộ + Hàng hải</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chặng 2: Trung Quốc (Gia công/Sản xuất) -->
+        <div id="step-card-1" class="cursor-pointer transition-all p-3 rounded-xl border border-slate-800 bg-slate-800/40 hover:border-slate-700 group">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 flex items-center justify-center font-bold text-xs shrink-0">
+              <i class="fa-solid fa-industry"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-200 group-hover:text-indigo-300">2. Nhà máy: Ninh Ba, TQ</span>
+                <span class="text-[10px] text-indigo-400 font-medium bg-indigo-500/10 px-1.5 py-0.5 rounded">Processing</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                Vải cuộn và linh kiện phụ trợ được gia công bán thành phẩm tại nhà xưởng công nghiệp Ninh Ba (Ningbo).
+              </p>
+              <div class="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
+                <span><i class="fa-solid fa-calendar-day mr-1"></i>18/10/2026</span>
+                <span><i class="fa-solid fa-ship mr-1"></i>Tàu biển vượt Thái Bình Dương</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chặng 3: Việt Nam (Hoàn thiện sản phẩm) -->
+        <div id="step-card-2" class="cursor-pointer transition-all p-3 rounded-xl border border-slate-800 bg-slate-800/40 hover:border-slate-700 group">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center font-bold text-xs shrink-0">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-200 group-hover:text-emerald-300">3. Đích đến: Hải Phòng, VN</span>
+                <span class="text-[10px] text-emerald-400 font-medium bg-emerald-500/10 px-1.5 py-0.5 rounded">Finished Goods</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                Lắp ráp khâu cuối, kiểm định chất lượng (QC) và đóng gói sẵn sàng xuất khẩu tại khu kinh tế Đình Vũ - Hải Phòng.
+              </p>
+              <div class="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
+                <span><i class="fa-solid fa-calendar-day mr-1"></i>28/10/2026</span>
+                <span><i class="fa-solid fa-anchor mr-1"></i>Cảng Đình Vũ</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Thống kê tổng quãng đường -->
+      <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+        <div>Tổng chặng: <span class="font-bold text-slate-200">~15,200 km</span></div>
+        <div>Thời gian di chuyển: <span class="font-bold text-sky-400">27 ngày</span></div>
+      </div>
+    </div>
+
+    <!-- Widget chọn tốc độ mô phỏng -->
+    <div class="absolute bottom-5 right-5 z-[1000] bg-slate-900/90 backdrop-blur-md border border-slate-800 px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-3">
+      <span class="text-xs text-slate-400 font-medium">Tốc độ:</span>
+      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30" data-speed="1">1x</button>
+      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="2">2x</button>
+      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="4">4x</button>
+    </div>
+  </main>
+
+  <script>
+    // Tọa độ 3 điểm mấu chốt
+    const STOPS = [
+      {
+        id: "memphis",
+        name: "Memphis, Tennessee (USA)",
+        type: "Raw Material",
+        coords: [35.1495, -90.0490],
+        date: "01 Tháng 10, 2026",
+        details: "Điểm xuất phát: Thu gom nguyên vật liệu sợi bông & hóa chất hữu cơ.",
+        color: "#f59e0b",
+        icon: "fa-boxes-stacked"
+      },
+      {
+        id: "china",
+        name: "Ninh Ba (Ningbo), Trung Quốc",
+        type: "Processing & Manufacturing",
+        coords: [29.8683, 121.5440],
+        date: "18 Tháng 10, 2026",
+        details: "Nhà máy chính: Dệt, tiền xử lý và cắt định hình theo bản thiết kế.",
+        color: "#6366f1",
+        icon: "fa-industry"
+      },
+      {
+        id: "vietnam",
+        name: "Hải Phòng, Việt Nam",
+        type: "Finished Goods & QC",
+        coords: [20.8449, 106.6881],
+        date: "28 Tháng 10, 2026",
+        details: "Thành phẩm: Hoàn thiện gia công đường may cuối, đóng hộp và bàn giao kho.",
+        color: "#10b981",
+        icon: "fa-circle-check"
+      }
+    ];
+
+    // Khởi tạo Leaflet Map
+    const map = L.map('map', {
+      center: [28, 5],
+      zoom: 3,
+      minZoom: 2,
+      maxZoom: 10,
+      zoomControl: false
+    });
+
+    L.control.zoom({ position: 'bottomleft' }).addTo(map);
+
+    // 3 nguồn Tile layer miễn phí 100% không giới hạn
+    const tileLayers = {
+      dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CARTO &copy; OpenStreetMap',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }),
+      osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+      }),
+      satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri &copy; Earthstar Geographics',
+        maxZoom: 18
+      })
+    };
+
+    let currentTileLayer = tileLayers.dark.addTo(map);
+
+    // Chuyển đổi tile
+    const tileSelector = document.getElementById('tileSelector');
+    if (tileSelector) {
+      tileSelector.addEventListener('change', (e) => {
+        map.removeLayer(currentTileLayer);
+        currentTileLayer = tileLayers[e.target.value] || tileLayers.dark;
+        currentTileLayer.addTo(map);
+      });
+    }
+
+    // Hàm tạo đường cong mô phỏng đường bay/tàu biển vượt Thái Bình Dương
+    function createCurvedPath(startCoord, endCoord, bendFactor = 0.15) {
+      const lat1 = startCoord[0];
+      const lng1 = startCoord[1];
+      const lat2 = endCoord[0];
+      const lng2 = endCoord[1];
+
+      let adjustedLng2 = lng2;
+      if (lng1 < 0 && lng2 > 0 && Math.abs(lng2 - lng1) > 180) {
+        adjustedLng2 = lng2 - 360;
+      }
+
+      const points = [];
+      const steps = 80;
+
+      const midLat = (lat1 + lat2) / 2 + Math.abs(adjustedLng2 - lng1) * bendFactor;
+      const midLng = (lng1 + adjustedLng2) / 2;
+
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * midLat + t * t * lat2;
+        let lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * midLng + t * t * adjustedLng2;
+
+        if (lng < -180) lng += 360;
+        if (lng > 180) lng -= 360;
+
+        points.push([lat, lng]);
+      }
+      return points;
+    }
+
+    const segment1Coords = createCurvedPath(STOPS[0].coords, STOPS[1].coords, 0.22);
+    const segment2Coords = createCurvedPath(STOPS[1].coords, STOPS[2].coords, 0.05);
+    const fullRouteCoords = [...segment1Coords, ...segment2Coords.slice(1)];
+
+    // Đường mờ nền
+    L.polyline(segment1Coords, { color: '#38bdf8', weight: 3, opacity: 0.35, dashArray: '4, 8' }).addTo(map);
+    L.polyline(segment2Coords, { color: '#34d399', weight: 3, opacity: 0.35, dashArray: '4, 8' }).addTo(map);
+
+    // Đường nét đứt chuyển động neon
+    L.polyline(segment1Coords, { color: '#38bdf8', weight: 3.5, opacity: 0.9, dashArray: '10, 15', className: 'route-animated' }).addTo(map);
+    L.polyline(segment2Coords, { color: '#34d399', weight: 3.5, opacity: 0.9, dashArray: '10, 15', className: 'route-animated' }).addTo(map);
+
+    // Đặt pin cho các trạm
+    STOPS.forEach((stop, index) => {
+      const customIcon = L.divIcon({
+        className: 'custom-pin',
+        html: `
+          <div style="color: ${stop.color};" class="pulse-marker flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 border-2 border-current shadow-lg text-xs">
+            <i class="fa-solid ${stop.icon}"></i>
+          </div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      });
+
+      const marker = L.marker(stop.coords, { icon: customIcon }).addTo(map);
+
+      const popupContent = `
+        <div class="p-2 space-y-1">
+          <div class="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
+            <i class="fa-solid fa-location-dot" style="color: ${stop.color}"></i> ${stop.type}
+          </div>
+          <div class="font-bold text-sm text-white">${stop.name}</div>
+          <p class="text-xs text-slate-300 mt-1">${stop.details}</p>
+          <div class="text-[11px] text-sky-400 font-mono mt-1 pt-1 border-t border-slate-800">
+            Ngày: ${stop.date}
+          </div>
+        </div>
+      `;
+      marker.bindPopup(popupContent);
+
+      const card = document.getElementById(`step-card-${index}`);
+      if (card) {
+        card.addEventListener('click', () => {
+          map.flyTo(stop.coords, 6, { duration: 1.5 });
+          marker.openPopup();
+          highlightCard(index);
+        });
+      }
+    });
+
+    // Icon kiện hàng chuyển động
+    const cargoIcon = L.divIcon({
+      className: 'cargo-icon',
+      html: `
+        <div class="w-8 h-8 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center shadow-lg shadow-amber-400/50 border-2 border-white text-xs">
+          <i class="fa-solid fa-box font-bold"></i>
+        </div>
+      `,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
+    });
+
+    const cargoMarker = L.marker(fullRouteCoords[0], { icon: cargoIcon, zIndexOffset: 1000 }).addTo(map);
+
+    // Animation vòng lặp chuyển động
+    let animationFrameId = null;
+    let isPlaying = false;
+    let progress = 0;
+    let speedMultiplier = 1;
+
+    function animateMovement() {
+      if (!isPlaying) return;
+
+      progress += 0.0018 * speedMultiplier;
+      if (progress >= 1) progress = 0;
+
+      const totalPoints = fullRouteCoords.length;
+      const indexFloat = progress * (totalPoints - 1);
+      const currentIndex = Math.floor(indexFloat);
+      const nextIndex = Math.min(currentIndex + 1, totalPoints - 1);
+      const subRatio = indexFloat - currentIndex;
+
+      const p1 = fullRouteCoords[currentIndex];
+      const p2 = fullRouteCoords[nextIndex];
+
+      const currentLat = p1[0] + (p2[0] - p1[0]) * subRatio;
+      const currentLng = p1[1] + (p2[1] - p1[1]) * subRatio;
+
+      cargoMarker.setLatLng([currentLat, currentLng]);
+
+      if (progress < segment1Coords.length / fullRouteCoords.length) {
+        highlightCard(0);
+        document.getElementById('currentMilestoneLabel').innerText = "Chặng 1: Mỹ ➔ TQ";
+      } else {
+        highlightCard(1);
+        document.getElementById('currentMilestoneLabel').innerText = "Chặng 2: TQ ➔ VN";
+      }
+
+      animationFrameId = requestAnimationFrame(animateMovement);
+    }
+
+    function highlightCard(activeIdx) {
+      [0, 1, 2].forEach(i => {
+        const c = document.getElementById(`step-card-${i}`);
+        if (!c) return;
+        if (i === activeIdx) {
+          c.classList.add('border-sky-500/50', 'bg-sky-500/10');
+          c.classList.remove('border-slate-800', 'bg-slate-800/40');
+        } else {
+          c.classList.remove('border-sky-500/50', 'bg-sky-500/10');
+          c.classList.add('border-slate-800', 'bg-slate-800/40');
+        }
+      });
+    }
+
+    // Nút Play / Pause
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+
+    btnPlay.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        playIcon.classList.replace('fa-play', 'fa-pause');
+        playText.innerText = "Tạm Dừng";
+        animateMovement();
+      } else {
+        playIcon.classList.replace('fa-pause', 'fa-play');
+        playText.innerText = "Tiếp Tục";
+        cancelAnimationFrame(animationFrameId);
+      }
+    });
+
+    // Nút xem toàn cảnh
+    document.getElementById('btnReset').addEventListener('click', () => {
+      const bounds = L.latLngBounds(fullRouteCoords);
+      map.fitBounds(bounds, { padding: [60, 60] });
+    });
+
+    // Nút tốc độ
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.speed-btn').forEach(b => {
+          b.classList.remove('bg-sky-500/20', 'text-sky-400', 'border', 'border-sky-500/30');
+          b.classList.add('bg-slate-800', 'text-slate-400');
+        });
+        e.target.classList.add('bg-sky-500/20', 'text-sky-400', 'border', 'border-sky-500/30');
+        e.target.classList.remove('bg-slate-800', 'text-slate-400');
+        speedMultiplier = parseFloat(e.target.dataset.speed);
+      });
+    });
+
+    // Khởi tạo chuẩn xác khi trang tải xong
+    window.onload = function() {
+      map.invalidateSize();
+      const bounds = L.latLngBounds(fullRouteCoords);
+      map.fitBounds(bounds, { padding: [50, 50] });
+
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 300);
+
+      setTimeout(() => {
+        btnPlay.click();
+      }, 1000);
+    };
+
+    window.addEventListener('resize', () => {
+      map.invalidateSize();
+    });
+  </script>
+</body>
+</html>
