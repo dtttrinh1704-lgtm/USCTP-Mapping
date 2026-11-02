@@ -85,199 +85,235 @@
       background-color: #0b1120;
     }
 
-    /* Custom Mobile Bottom-Sheet transitions */
+    /* Dedicated Mobile View Mode styles */
+    body.mode-mobile #infoPanel {
+      top: auto !important;
+      left: 0.75rem !important;
+      right: 0.75rem !important;
+      bottom: 0.75rem !important;
+      width: auto !important;
+      max-width: none !important;
+    }
+    body.mode-mobile #speedWidget {
+      top: 0.75rem !important;
+      bottom: auto !important;
+      right: 0.75rem !important;
+    }
+
+    /* Web View Mode forced styles */
+    body.mode-web #infoPanel {
+      top: 1rem !important;
+      left: 1rem !important;
+      right: auto !important;
+      bottom: auto !important;
+      width: 20rem !important;
+      max-height: calc(100vh - 5.5rem) !important;
+    }
+    body.mode-web #speedWidget {
+      bottom: 1.25rem !important;
+      top: auto !important;
+      right: 1.25rem !important;
+    }
+    body.mode-web #panelMobileHeader {
+      display: none !important;
+    }
+    body.mode-web #panelCollapsibleBody {
+      display: block !important;
+    }
+
+    /* Custom Mobile Bottom-Sheet transitions when in mobile layout */
     @media (max-width: 640px) {
-      .mobile-sheet {
-        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      body:not(.mode-web) #infoPanel {
+        top: auto;
+        bottom: 0.5rem;
+        left: 0.5rem;
+        right: 0.5rem;
+        width: auto;
       }
-      .mobile-sheet.collapsed {
-        transform: translateY(calc(100% - 54px));
+      body:not(.mode-web) #speedWidget {
+        top: 0.75rem;
+        bottom: auto;
+        right: 0.75rem;
       }
     }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 flex flex-col h-screen h-[100dvh] overflow-hidden select-none">
 
-  <!-- Header: Mobile Optimized with compact layout -->
-  <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-2 z-20 shadow-lg shrink-0">
+  <!-- Header: Mode Switcher & Controls -->
+  <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between gap-2 z-20 shadow-lg shrink-0">
     <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
-      <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
-        <i class="fa-solid fa-route text-sm sm:text-lg"></i>
+      <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
+        <i class="fa-solid fa-route text-xs sm:text-base"></i>
       </div>
       <div class="min-w-0">
-        <h1 class="text-xs sm:text-base font-bold tracking-tight text-white flex items-center gap-1.5 truncate">
+        <h1 class="text-xs sm:text-sm font-bold tracking-tight text-white flex items-center gap-1.5 truncate">
           <span>US Cotton Journey</span>
-          <span class="text-[9px] sm:text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium px-1.5 sm:px-2 py-0.5 rounded-full shrink-0">T5 &rarr; T1</span>
+          <span class="text-[9px] sm:text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium px-1.5 py-0.5 rounded-full shrink-0">T5 &rarr; T1</span>
         </h1>
-        <p class="text-[10px] sm:text-xs text-slate-400 truncate hidden xs:block">Memphis &rarr; Jiangsu &rarr; Nam Dinh</p>
+        <p class="text-[10px] text-slate-400 truncate hidden md:block">Memphis &rarr; Jiangsu &rarr; Nam Dinh</p>
       </div>
     </div>
 
-    <!-- Quick controls -->
+    <!-- Quick controls & View Mode Switcher -->
     <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-      <button id="btnPlay" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-[11px] sm:text-xs transition-all shadow-md flex items-center gap-1 sm:gap-2">
-        <i class="fa-solid fa-play text-[10px] sm:text-xs" id="playIcon"></i> <span id="playText" class="hidden xs:inline">Start</span>
-      </button>
-      <button id="btnReset" class="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-[11px] sm:text-xs transition border border-slate-700 flex items-center gap-1" title="Overview">
-        <i class="fa-solid fa-expand text-[10px] sm:text-xs"></i> <span class="hidden sm:inline">Overview</span>
+      <!-- Mode Switcher: Web vs Mobile -->
+      <div class="bg-slate-800/90 border border-slate-700/80 p-0.5 rounded-lg flex items-center text-[10px] sm:text-xs font-semibold">
+        <button id="btnModeAuto" class="px-2 py-1 rounded bg-sky-500 text-slate-950 transition flex items-center gap-1" title="Auto detect screen">
+          <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> <span class="hidden sm:inline">Auto</span>
+        </button>
+        <button id="btnModeWeb" class="px-2 py-1 rounded text-slate-400 hover:text-white transition flex items-center gap-1" title="Desktop Web Mode">
+          <i class="fa-solid fa-desktop text-[9px]"></i> <span class="hidden sm:inline">Web</span>
+        </button>
+        <button id="btnModeMobile" class="px-2 py-1 rounded text-slate-400 hover:text-white transition flex items-center gap-1" title="Mobile App Mode">
+          <i class="fa-solid fa-mobile-screen-button text-[9px]"></i> <span class="hidden sm:inline">Mobile</span>
+        </button>
+      </div>
+
+      <button id="btnPlay" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-[11px] sm:text-xs transition shadow-md flex items-center gap-1">
+        <i class="fa-solid fa-play text-[10px]" id="playIcon"></i> <span id="playText" class="hidden sm:inline">Start</span>
       </button>
 
-      <!-- Map Style Selector -->
-      <select id="tileSelector" class="bg-slate-800 border border-slate-700 text-slate-200 text-[11px] sm:text-xs rounded-lg px-2 py-1.5 sm:py-2 outline-none focus:border-sky-500 cursor-pointer">
+      <button id="btnReset" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-[11px] transition border border-slate-700" title="Overview">
+        <i class="fa-solid fa-expand text-[10px]"></i>
+      </button>
+
+      <!-- Map Style Selector (Strictly Standard OSM & Satellite only) -->
+      <select id="tileSelector" class="bg-slate-800 border border-slate-700 text-slate-200 text-[11px] rounded-lg px-2 py-1.5 outline-none focus:border-sky-500 cursor-pointer">
         <option value="osm" selected>Standard (OSM)</option>
         <option value="satellite">Satellite</option>
       </select>
     </div>
   </header>
 
-  <!-- Main Viewport: Map + Responsive Floating Drawer/Panel -->
+  <!-- Main Viewport: Map + Streamlined Zero-Dead-Space Info Panel -->
   <main class="relative flex-1 w-full h-full overflow-hidden">
     <!-- Map Container -->
     <div id="map" class="w-full h-full"></div>
 
-    <!-- Responsive Panel: Desktop Floating Sidebar / Mobile Bottom-Sheet Drawer -->
-    <div id="infoPanel" class="mobile-sheet collapsed absolute sm:top-4 sm:left-4 bottom-0 left-0 right-0 sm:right-auto z-[1000] w-full sm:w-80 max-h-[82vh] sm:max-h-[calc(100vh-6rem)] bg-slate-900/95 sm:bg-slate-900/95 backdrop-blur-xl border-t sm:border border-slate-800/90 rounded-t-3xl sm:rounded-2xl shadow-2xl transition-transform sm:transition-none flex flex-col">
+    <!-- Tight, Zero-Dead-Space Panel -->
+    <div id="infoPanel" class="absolute top-3 left-3 z-[1000] w-[calc(100%-1.5rem)] sm:w-72 bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-xl shadow-2xl overflow-hidden transition-all duration-300">
       
-      <!-- Mobile Drag Handle & Header bar -->
-      <div id="panelToggleBtn" class="sm:hidden px-4 py-2.5 flex flex-col items-center justify-center cursor-pointer border-b border-slate-800/60 bg-slate-800/40 rounded-t-3xl active:bg-slate-800">
-        <div class="w-10 h-1 rounded-full bg-slate-600 mb-1.5"></div>
-        <div class="w-full flex items-center justify-between text-[11px]">
-          <span class="font-semibold text-slate-300 flex items-center gap-1.5">
-            <i class="fa-solid fa-circle-info text-sky-400"></i> Order & Transit Info
+      <!-- Mobile / Compact Header Bar with toggle -->
+      <div id="panelMobileHeader" class="px-3 py-2 bg-slate-800/60 border-b border-slate-800/80 flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="relative flex h-2 w-2 shrink-0">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
-          <span id="panelToggleIcon" class="text-xs text-sky-400 font-medium flex items-center gap-1">
-            <span>Details</span> <i class="fa-solid fa-chevron-up"></i>
-          </span>
+          <span class="text-[11px] font-bold text-slate-200 truncate">PO380048072</span>
+          <span id="activeTierBadgeMini" class="text-[9px] font-bold bg-sky-500/20 text-sky-400 px-1.5 py-0.2 rounded border border-sky-500/30">T5 &rarr; T4</span>
         </div>
+        <button id="panelToggleBtn" class="text-[10px] text-sky-400 font-semibold hover:text-sky-300 flex items-center gap-1">
+          <span id="toggleText">Details</span> <i id="toggleIcon" class="fa-solid fa-chevron-down text-[9px] transition-transform"></i>
+        </button>
       </div>
 
-      <!-- Scrollable content area -->
-      <div class="p-4 sm:p-5 overflow-y-auto space-y-3.5">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-          <div class="flex items-center gap-2">
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+      <!-- Compact Content Body -->
+      <div id="panelCollapsibleBody" class="p-3 space-y-2.5 overflow-y-auto max-h-[75vh] sm:max-h-[calc(100vh-8rem)]">
+        <!-- Live Movement Leg -->
+        <div class="bg-slate-950/60 border border-slate-800/80 rounded-lg p-2.5 space-y-2">
+          <div class="flex items-center justify-between border-b border-slate-800/60 pb-1.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-truck-fast text-sky-400 text-[10px]"></i> Live Movement
             </span>
-            <span class="text-[11px] font-semibold tracking-wider text-slate-300 uppercase">Live Cotton Movement</span>
-          </div>
-          <span id="activeTierBadge" class="text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-full">T5 &rarr; T4</span>
-        </div>
-
-        <!-- Live Dispatch Route Indicator -->
-        <div class="space-y-3">
-          <!-- Origin Node -->
-          <div class="flex items-start gap-2.5">
-            <div class="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 text-sky-400 flex items-center justify-center shrink-0 text-xs shadow-inner">
-              <i class="fa-solid fa-circle-dot text-[9px]"></i>
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="text-[9px] uppercase font-semibold text-slate-400">Current Departure</div>
-              <div id="statusFromTier" class="text-xs font-bold text-slate-100 truncate">Tier 5: Origin</div>
-              <div id="statusFromPlace" class="text-[11px] text-slate-400 truncate">Tennessee, USA</div>
-            </div>
+            <span id="activeTierBadge" class="text-[9px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30 px-1.5 py-0.5 rounded">T5 &rarr; T4</span>
           </div>
 
-          <!-- Connection animated line -->
-          <div class="flex items-center pl-3.5 -my-2 text-slate-500">
-            <div class="h-5 w-0.5 bg-gradient-to-b from-sky-400/80 via-emerald-400/80 to-indigo-400/80 ml-[2px]"></div>
-            <i class="fa-solid fa-arrow-down text-[9px] ml-2.5 text-sky-400 animate-bounce"></i>
-          </div>
-
-          <!-- Destination Node -->
-          <div class="flex items-start gap-2.5">
-            <div class="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 text-emerald-400 flex items-center justify-center shrink-0 text-xs shadow-inner">
-              <i class="fa-solid fa-location-dot text-[11px]"></i>
+          <div class="space-y-1.5">
+            <!-- Departure -->
+            <div class="flex items-center gap-2">
+              <div class="w-5 h-5 rounded bg-slate-800 border border-slate-700 text-sky-400 flex items-center justify-center shrink-0 text-[8px]">
+                <i class="fa-solid fa-circle-dot"></i>
+              </div>
+              <div class="min-w-0 flex-1 flex items-baseline justify-between gap-1">
+                <span id="statusFromTier" class="text-[11px] font-bold text-slate-200 truncate">Tier 5: Origin</span>
+                <span id="statusFromPlace" class="text-[10px] text-slate-400 truncate">Tennessee, USA</span>
+              </div>
             </div>
-            <div class="min-w-0 flex-1">
-              <div class="text-[9px] uppercase font-semibold text-slate-400">Next Destination</div>
-              <div id="statusToTier" class="text-xs font-bold text-slate-100 truncate">Tier 4: Ginner</div>
-              <div id="statusToPlace" class="text-[11px] text-slate-400 truncate">Tennessee, USA</div>
+
+            <!-- Direction indicator -->
+            <div class="flex items-center pl-2.5 -my-1 text-slate-600">
+              <i class="fa-solid fa-arrow-down text-[8px] text-sky-400/80"></i>
+            </div>
+
+            <!-- Next Destination -->
+            <div class="flex items-center gap-2">
+              <div class="w-5 h-5 rounded bg-slate-800 border border-slate-700 text-emerald-400 flex items-center justify-center shrink-0 text-[8px]">
+                <i class="fa-solid fa-location-dot"></i>
+              </div>
+              <div class="min-w-0 flex-1 flex items-baseline justify-between gap-1">
+                <span id="statusToTier" class="text-[11px] font-bold text-slate-200 truncate">Tier 4: Ginner</span>
+                <span id="statusToPlace" class="text-[10px] text-slate-400 truncate">Tennessee, USA</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- PO, Style No. & Product Name -->
-        <div class="pt-2 border-t border-slate-800 space-y-1.5">
-          <!-- 1. PO No. -->
+        <!-- Order & Product Specs (Order: PO No. -> Style No. -> Product Name) -->
+        <div class="bg-slate-950/60 border border-slate-800/80 rounded-lg p-2.5 space-y-1.5 text-[10px]">
+          <!-- PO No. -->
           <div class="flex items-center justify-between">
-            <span class="text-[9px] uppercase tracking-wider font-semibold text-slate-400">PO No.</span>
-            <span class="text-[11px] font-bold font-mono text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 px-2 py-0.5 rounded">
-              PO380048072
-            </span>
+            <span class="text-[9px] uppercase font-semibold text-slate-400">PO No.</span>
+            <span class="font-bold font-mono text-emerald-400 bg-emerald-400/10 border border-emerald-400/25 px-1.5 py-0.5 rounded">PO380048072</span>
           </div>
 
-          <!-- 2. Style No. -->
+          <!-- Style No. -->
           <div class="flex items-center justify-between">
-            <span class="text-[9px] uppercase tracking-wider font-semibold text-slate-400">Style No.</span>
-            <span class="text-[11px] font-bold font-mono text-sky-400 bg-sky-400/10 border border-sky-400/30 px-2 py-0.5 rounded">
-              1MG3058
-            </span>
+            <span class="text-[9px] uppercase font-semibold text-slate-400">Style No.</span>
+            <span class="font-bold font-mono text-sky-400 bg-sky-400/10 border border-sky-400/25 px-1.5 py-0.5 rounded">1MG3058</span>
           </div>
 
-          <!-- 3. Product Name - Fits on 1 single line -->
-          <div class="flex items-center justify-between gap-1 pt-0.5">
-            <span class="text-[9px] uppercase tracking-wider font-semibold text-slate-400 shrink-0">Product</span>
-            <span class="text-[10px] font-bold text-amber-300 bg-amber-400/10 border border-amber-400/25 px-1.5 py-0.5 rounded truncate whitespace-nowrap text-right max-w-[190px]" title="MEN'S FOCUS TECH HOODIE REMIX">
+          <!-- Product Name (Clean 1-line fit) -->
+          <div class="flex items-center justify-between gap-1 pt-0.5 border-t border-slate-800/60">
+            <span class="text-[9px] uppercase font-semibold text-slate-400 shrink-0">Product</span>
+            <span class="font-bold text-amber-300 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded truncate text-right text-[10px]" title="MEN'S FOCUS TECH HOODIE REMIX">
               MEN'S FOCUS TECH HOODIE REMIX
             </span>
           </div>
         </div>
 
-        <!-- Admin Product Image Upload Section -->
-        <div class="pt-2 border-t border-slate-800/90">
-          <div class="flex items-center justify-between mb-1">
-            <span class="text-[10px] font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1">
-              <i class="fa-solid fa-camera text-sky-400 text-[10px]"></i> Product Image
+        <!-- Product Image: Strict 4:5 ratio, compact, zero labels -->
+        <div class="bg-slate-950/60 border border-slate-800/80 rounded-lg p-2">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+              <i class="fa-solid fa-camera text-sky-400 text-[9px]"></i> Product Image
             </span>
           </div>
 
-          <!-- Centered compact box maintaining 4:5 ratio -->
-          <div id="imageUploadContainer" class="relative group max-w-[110px] sm:max-w-[125px] mx-auto">
+          <div class="w-24 sm:w-28 mx-auto relative group">
             <input type="file" id="productImgInput" accept="image/*" class="hidden">
 
-            <!-- Empty Dropzone State -->
+            <!-- Empty Dropzone -->
             <div id="emptyImagePrompt" onclick="document.getElementById('productImgInput').click()" 
-                 class="cursor-pointer border-2 border-dashed border-slate-700/80 hover:border-sky-500/80 bg-slate-950/50 hover:bg-sky-500/5 rounded-xl aspect-[4/5] flex flex-col items-center justify-center p-2 text-center transition-all duration-200">
-              <div class="w-6 h-6 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-400 group-hover:text-sky-400 mb-1 transition-colors">
-                <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
-              </div>
-              <p class="text-[9px] font-semibold text-slate-300">Upload Photo</p>
+                 class="cursor-pointer border border-dashed border-slate-700 hover:border-sky-500 bg-slate-900/50 hover:bg-sky-500/10 rounded-lg aspect-[4/5] flex flex-col items-center justify-center p-1.5 text-center transition">
+              <i class="fa-solid fa-cloud-arrow-up text-slate-400 group-hover:text-sky-400 text-sm mb-1"></i>
+              <p class="text-[9px] font-medium text-slate-300">Upload Photo</p>
             </div>
 
-            <!-- Image Preview Display -->
-            <div id="imagePreviewBox" class="hidden relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 aspect-[4/5] group/img shadow-md">
-              <img id="productImageElement" src="" alt="Product 1MG3058" class="w-full h-full object-cover object-center">
-              
-              <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px] opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
-                <button onclick="document.getElementById('productImgInput').click()" class="px-2 py-1 rounded-md bg-sky-500/90 hover:bg-sky-400 text-slate-950 text-[9px] font-bold shadow-md flex items-center gap-1 transition">
-                  <i class="fa-solid fa-arrows-rotate text-[8px]"></i> Change
+            <!-- Preview Display -->
+            <div id="imagePreviewBox" class="hidden relative rounded-lg overflow-hidden border border-slate-700 aspect-[4/5] group/img bg-slate-950">
+              <img id="productImageElement" src="" alt="1MG3058" class="w-full h-full object-cover">
+              <div class="absolute inset-0 bg-slate-950/75 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                <button onclick="document.getElementById('productImgInput').click()" class="px-2 py-0.5 rounded bg-sky-500 text-slate-950 text-[9px] font-bold" title="Change">
+                  <i class="fa-solid fa-rotate text-[8px]"></i>
                 </button>
-                <button onclick="removeProductImage()" class="px-2 py-1 rounded-md bg-rose-500/90 hover:bg-rose-400 text-white text-[9px] font-bold shadow-md flex items-center gap-1 transition">
-                  <i class="fa-solid fa-trash-can text-[8px]"></i>
+                <button onclick="removeProductImage()" class="px-2 py-0.5 rounded bg-rose-500 text-white text-[9px] font-bold" title="Remove">
+                  <i class="fa-solid fa-trash text-[8px]"></i>
                 </button>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Note -->
-        <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400">
-          <div class="flex items-center gap-1">
-            <i class="fa-solid fa-arrow-pointer text-sky-400 text-[9px]"></i>
-            <span>Tap/hover icons for details</span>
-          </div>
-          <span class="text-[9px] text-slate-500 font-mono">T5 &rarr; T1</span>
         </div>
       </div>
     </div>
 
-    <!-- Speed Adjustment Widget: Repositioned & Non-overlapping on mobile -->
-    <div class="absolute top-3 right-3 sm:top-auto sm:bottom-5 sm:right-5 z-[999] bg-slate-900/90 backdrop-blur-md border border-slate-800 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl shadow-xl flex items-center gap-1.5 sm:gap-3">
-      <span class="text-[10px] sm:text-xs text-slate-400 font-medium">Speed:</span>
-      <button class="speed-btn px-1.5 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs rounded bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30" data-speed="0.5">0.5x</button>
-      <button class="speed-btn px-1.5 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="1">1x</button>
-      <button class="speed-btn px-1.5 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="2">2x</button>
+    <!-- Speed Adjustment Widget -->
+    <div id="speedWidget" class="absolute bottom-4 right-4 z-[999] bg-slate-900/90 backdrop-blur-md border border-slate-800 px-2.5 py-1.5 rounded-lg shadow-xl flex items-center gap-1.5">
+      <span class="text-[10px] text-slate-400 font-medium">Speed:</span>
+      <button class="speed-btn px-2 py-0.5 text-[10px] rounded bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30" data-speed="0.5">0.5x</button>
+      <button class="speed-btn px-2 py-0.5 text-[10px] rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="1">1x</button>
+      <button class="speed-btn px-2 py-0.5 text-[10px] rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="2">2x</button>
     </div>
   </main>
 
@@ -561,6 +597,7 @@
 
     // Elements for left status card
     const elActiveBadge = document.getElementById('activeTierBadge');
+    const elActiveBadgeMini = document.getElementById('activeTierBadgeMini');
     const elFromTier = document.getElementById('statusFromTier');
     const elFromPlace = document.getElementById('statusFromPlace');
     const elToTier = document.getElementById('statusToTier');
@@ -581,12 +618,15 @@
       const fromNode = STOPS[activeLeg];
       const toNode = STOPS[activeLeg + 1];
 
-      elActiveBadge.innerText = `${fromNode.tag.split(' ')[0]} ➔ ${toNode.tag.split(' ')[0]}`;
-      elFromTier.innerText = `${fromNode.tier} (${fromNode.company})`;
-      elFromPlace.innerText = fromNode.location;
+      const tagText = `${fromNode.tag.split(' ')[0]} ➔ ${toNode.tag.split(' ')[0]}`;
+      if (elActiveBadge) elActiveBadge.innerText = tagText;
+      if (elActiveBadgeMini) elActiveBadgeMini.innerText = tagText;
+      
+      if (elFromTier) elFromTier.innerText = `${fromNode.tier.split(':')[0]} (${fromNode.company})`;
+      if (elFromPlace) elFromPlace.innerText = fromNode.location;
 
-      elToTier.innerText = `${toNode.tier} (${toNode.company})`;
-      elToPlace.innerText = toNode.location;
+      if (elToTier) elToTier.innerText = `${toNode.tier.split(':')[0]} (${toNode.company})`;
+      if (elToPlace) elToPlace.innerText = toNode.location;
     }
 
     function animateMovement() {
@@ -636,21 +676,70 @@
       map.fitBounds(bounds, { padding: [40, 40] });
     });
 
-    // Mobile Bottom Sheet Toggle Logic
-    const infoPanel = document.getElementById('infoPanel');
-    const panelToggleBtn = document.getElementById('panelToggleBtn');
-    const panelToggleIcon = document.getElementById('panelToggleIcon');
+    // Panel collapse / expand toggle
+    const panelMobileHeader = document.getElementById('panelMobileHeader');
+    const panelCollapsibleBody = document.getElementById('panelCollapsibleBody');
+    const toggleText = document.getElementById('toggleText');
+    const toggleIcon = document.getElementById('toggleIcon');
+    let isPanelOpen = true;
 
-    if (panelToggleBtn && infoPanel) {
-      panelToggleBtn.addEventListener('click', () => {
-        const isCollapsed = infoPanel.classList.toggle('collapsed');
-        if (isCollapsed) {
-          panelToggleIcon.innerHTML = `<span>Details</span> <i class="fa-solid fa-chevron-up"></i>`;
-        } else {
-          panelToggleIcon.innerHTML = `<span>Hide</span> <i class="fa-solid fa-chevron-down"></i>`;
-        }
+    function setPanelState(open) {
+      isPanelOpen = open;
+      if (open) {
+        panelCollapsibleBody.style.display = 'block';
+        if (toggleText) toggleText.innerText = 'Hide';
+        if (toggleIcon) toggleIcon.style.transform = 'rotate(180deg)';
+      } else {
+        panelCollapsibleBody.style.display = 'none';
+        if (toggleText) toggleText.innerText = 'Details';
+        if (toggleIcon) toggleIcon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    if (panelMobileHeader) {
+      panelMobileHeader.addEventListener('click', () => {
+        setPanelState(!isPanelOpen);
       });
     }
+
+    // Explicit Mode Switcher: Auto, Web, Mobile
+    const btnModeAuto = document.getElementById('btnModeAuto');
+    const btnModeWeb = document.getElementById('btnModeWeb');
+    const btnModeMobile = document.getElementById('btnModeMobile');
+
+    function applyViewMode(mode) {
+      document.body.classList.remove('mode-web', 'mode-mobile');
+      [btnModeAuto, btnModeWeb, btnModeMobile].forEach(btn => {
+        btn.classList.remove('bg-sky-500', 'text-slate-950');
+        btn.classList.add('text-slate-400');
+      });
+
+      if (mode === 'web') {
+        document.body.classList.add('mode-web');
+        btnModeWeb.classList.add('bg-sky-500', 'text-slate-950');
+        btnModeWeb.classList.remove('text-slate-400');
+        setPanelState(true);
+      } else if (mode === 'mobile') {
+        document.body.classList.add('mode-mobile');
+        btnModeMobile.classList.add('bg-sky-500', 'text-slate-950');
+        btnModeMobile.classList.remove('text-slate-400');
+        setPanelState(false);
+      } else {
+        // Auto mode based on window size
+        btnModeAuto.classList.add('bg-sky-500', 'text-slate-950');
+        btnModeAuto.classList.remove('text-slate-400');
+        if (window.innerWidth < 640) {
+          setPanelState(false);
+        } else {
+          setPanelState(true);
+        }
+      }
+      setTimeout(() => map.invalidateSize(), 150);
+    }
+
+    btnModeAuto.addEventListener('click', () => applyViewMode('auto'));
+    btnModeWeb.addEventListener('click', () => applyViewMode('web'));
+    btnModeMobile.addEventListener('click', () => applyViewMode('mobile'));
 
     // Speed controls
     document.querySelectorAll('.speed-btn').forEach(btn => {
@@ -709,7 +798,14 @@
       map.invalidateSize();
       const bounds = L.latLngBounds(fullRouteCoords);
       const isMobile = window.innerWidth < 640;
-      map.fitBounds(bounds, { padding: isMobile ? [30, 30] : [50, 50] });
+      map.fitBounds(bounds, { padding: isMobile ? [25, 25] : [45, 45] });
+
+      // Default panel state based on device
+      if (isMobile) {
+        setPanelState(false);
+      } else {
+        setPanelState(true);
+      }
 
       updateStatusBox(0);
 
