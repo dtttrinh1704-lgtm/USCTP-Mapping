@@ -114,8 +114,8 @@
 
       <!-- Map Style Selector -->
       <select id="tileSelector" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-2 outline-none focus:border-sky-500 cursor-pointer">
+        <option value="osm" selected>Standard Map (OSM)</option>
         <option value="dark">Dark Theme</option>
-        <option value="osm">Standard Map (OSM)</option>
         <option value="satellite">Satellite View</option>
       </select>
     </div>
@@ -344,13 +344,14 @@
       })
     };
 
-    let currentTileLayer = tileLayers.dark.addTo(map);
+    let currentTileLayer = tileLayers.osm.addTo(map);
 
     const tileSelector = document.getElementById('tileSelector');
     if (tileSelector) {
+      tileSelector.value = 'osm';
       tileSelector.addEventListener('change', (e) => {
         map.removeLayer(currentTileLayer);
-        currentTileLayer = tileLayers[e.target.value] || tileLayers.dark;
+        currentTileLayer = tileLayers[e.target.value] || tileLayers.osm;
         currentTileLayer.addTo(map);
       });
     }
