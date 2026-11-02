@@ -157,7 +157,6 @@
         bottom: auto;
         right: 0.75rem;
       }
-      /* Adjust zoom buttons offset on mobile to not collide with speed widget */
       .leaflet-top.leaflet-right {
         top: 3.75rem !important;
         right: 0.75rem !important;
@@ -205,7 +204,7 @@
         <i class="fa-solid fa-expand text-[10px]"></i>
       </button>
 
-      <!-- Map Style Selector (Strictly Standard OSM & Satellite only) -->
+      <!-- Map Style Selector (Standard OSM & Satellite) -->
       <select id="tileSelector" class="bg-slate-800 border border-slate-700 text-slate-200 text-[11px] rounded-lg px-2 py-1.5 outline-none focus:border-sky-500 cursor-pointer">
         <option value="osm" selected>Standard (OSM)</option>
         <option value="satellite">Satellite</option>
@@ -221,7 +220,7 @@
     <!-- Tight, Zero-Dead-Space Panel -->
     <div id="infoPanel" class="absolute top-3 left-3 z-[1000] w-[calc(100%-1.5rem)] sm:w-72 bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-xl shadow-2xl overflow-hidden transition-all duration-300">
       
-      <!-- Mobile / Compact Header Bar with toggle (Enlarged hit target & visual contrast) -->
+      <!-- Mobile / Compact Header Bar with toggle -->
       <div id="panelMobileHeader" class="px-3.5 py-2.5 sm:py-2 bg-slate-800/80 active:bg-slate-700/80 border-b border-slate-700/80 flex items-center justify-between cursor-pointer select-none">
         <div class="flex items-center gap-2 min-w-0">
           <span class="relative flex h-2.5 w-2.5 shrink-0">
@@ -277,7 +276,7 @@
           </div>
         </div>
 
-        <!-- Order & Product Specs (Order: PO No. -> Style No. -> Product Name) -->
+        <!-- Order & Product Specs -->
         <div class="bg-slate-950/60 border border-slate-800/80 rounded-lg p-2.5 space-y-1.5 text-[10px]">
           <!-- PO No. -->
           <div class="flex items-center justify-between">
@@ -291,7 +290,7 @@
             <span class="font-bold font-mono text-sky-400 bg-sky-400/10 border border-sky-400/25 px-1.5 py-0.5 rounded">1MG3058</span>
           </div>
 
-          <!-- Product Name (Clean 1-line fit) -->
+          <!-- Product Name -->
           <div class="flex items-center justify-between gap-1 pt-0.5 border-t border-slate-800/60">
             <span class="text-[9px] uppercase font-semibold text-slate-400 shrink-0">Product</span>
             <span class="font-bold text-amber-300 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded truncate text-right text-[10px]" title="MEN'S FOCUS TECH HOODIE REMIX">
@@ -300,36 +299,23 @@
           </div>
         </div>
 
-        <!-- Product Image: Strict 4:5 ratio, compact, zero labels -->
+        <!-- Product Image: Trỏ trực tiếp file Hoodie.avif trong cùng thư mục GitHub (có fallback ảnh mẫu khi xem preview) -->
         <div class="bg-slate-950/60 border border-slate-800/80 rounded-lg p-2">
           <div class="flex items-center justify-between mb-1.5">
             <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
               <i class="fa-solid fa-camera text-sky-400 text-[9px]"></i> Product Image
             </span>
+            <span class="text-[9px] font-mono text-slate-500">1MG3058</span>
           </div>
 
-          <div class="w-24 sm:w-28 mx-auto relative group">
-            <input type="file" id="productImgInput" accept="image/*" class="hidden">
-
-            <!-- Empty Dropzone -->
-            <div id="emptyImagePrompt" onclick="document.getElementById('productImgInput').click()" 
-                 class="cursor-pointer border border-dashed border-slate-700 hover:border-sky-500 bg-slate-900/50 hover:bg-sky-500/10 rounded-lg aspect-[4/5] flex flex-col items-center justify-center p-1.5 text-center transition">
-              <i class="fa-solid fa-cloud-arrow-up text-slate-400 group-hover:text-sky-400 text-sm mb-1"></i>
-              <p class="text-[9px] font-medium text-slate-300">Upload Photo</p>
-            </div>
-
-            <!-- Preview Display -->
-            <div id="imagePreviewBox" class="hidden relative rounded-lg overflow-hidden border border-slate-700 aspect-[4/5] group/img bg-slate-950">
-              <img id="productImageElement" src="" alt="1MG3058" class="w-full h-full object-cover">
-              <div class="absolute inset-0 bg-slate-950/75 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
-                <button onclick="document.getElementById('productImgInput').click()" class="px-2 py-0.5 rounded bg-sky-500 text-slate-950 text-[9px] font-bold" title="Change">
-                  <i class="fa-solid fa-rotate text-[8px]"></i>
-                </button>
-                <button onclick="removeProductImage()" class="px-2 py-0.5 rounded bg-rose-500 text-white text-[9px] font-bold" title="Remove">
-                  <i class="fa-solid fa-trash text-[8px]"></i>
-                </button>
-              </div>
-            </div>
+          <div class="w-24 sm:w-28 mx-auto relative rounded-lg overflow-hidden border border-slate-700/80 aspect-[4/5] bg-slate-900 shadow-inner flex items-center justify-center">
+            <img 
+              id="productImageElement" 
+              src="./Hoodie.avif" 
+              alt="MEN'S FOCUS TECH HOODIE REMIX" 
+              class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=400&q=80';"
+            >
           </div>
         </div>
 
@@ -363,7 +349,7 @@
         role: "Raw Cotton Farming",
         company: "US Cotton Protocol",
         location: "Memphis, Tennessee, USA",
-        coords: [35.7500, -88.8200], // Spaced eastward in West Tennessee cotton belt
+        coords: [35.7500, -88.8200],
         details: "Origin: Seed cotton farming.",
         color: "#f59e0b",
         icon: "fa-seedling"
@@ -375,7 +361,7 @@
         role: "Cotton Ginning Facility",
         company: "US Cotton Protocol",
         location: "Memphis, Tennessee, USA",
-        coords: [35.0800, -90.1500], // Memphis logistics & river port ginning hub
+        coords: [35.0800, -90.1500],
         details: "Ginning: Seed separation, lint cleaning, conditioning, PBI labeling and bale packaging.",
         color: "#f97316",
         icon: "fa-boxes-packing"
@@ -387,7 +373,7 @@
         role: "Yarn Spinning Mill",
         company: "JIANGSU YUEDA COTTON SPINNING CO., LTD.",
         location: "Jiangsu, China",
-        coords: [33.7200, 120.3500], // North Jiangsu coastal spinning cluster
+        coords: [33.7200, 120.3500],
         details: "Spinning: Converting raw cotton bales into fine-count combed and carded ring-spun yarn.",
         color: "#6366f1",
         icon: "fa-industry"
@@ -399,7 +385,7 @@
         role: "Weaving & Dyeing",
         company: "Changzhou Yuyuang Textile Ltd.",
         location: "Changzhou, Jiangsu, China",
-        coords: [31.5500, 119.7200], // South Jiangsu / Taihu textile cluster (clearly separated from Yancheng)
+        coords: [31.5500, 119.7200],
         details: "Fabric Mill: Warp preparation, circular knitting / weaving, and finishing treatment.",
         color: "#a855f7",
         icon: "fa-scroll"
@@ -411,7 +397,7 @@
         role: "Apparel Manufacturing",
         company: "Youngone Corporation",
         location: "Nam Dinh, Vietnam",
-        coords: [20.4200, 106.1683], // Nam Dinh
+        coords: [20.4200, 106.1683],
         details: "Garment Factory: Pattern cutting, sewing assembly, finished garment QC, and retail packing.",
         color: "#14b8a6",
         icon: "fa-shirt"
@@ -427,10 +413,10 @@
       zoomControl: false
     });
 
-    // Zoom control placed at top-right to prevent any collision with bottom floating cards
+    // Zoom control on top-right
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // Free tile layer options (OSM default, Satellite alternative)
+    // Free tile layer options
     const tileLayers = {
       osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
@@ -454,7 +440,7 @@
       });
     }
 
-    // Function to calculate smooth, high-fidelity curved arc (Direct Eastbound / Transcontinental)
+    // Bézier curved path algorithm
     function createCurvedPath(startCoord, endCoord, bendFactor = 0.25, steps = 100, isTransAtlanticEurasia = false) {
       const lat1 = startCoord[0];
       const lng1 = startCoord[1];
@@ -462,9 +448,8 @@
       const lng2 = endCoord[1];
 
       let targetLng = lng2;
-      // When flying eastward from USA (-90) to China (+120) across Atlantic & Eurasia
       if (isTransAtlanticEurasia && lng1 < 0 && lng2 > 0) {
-        targetLng = lng2; // Direct eastward positive traversal across 0° prime meridian
+        targetLng = lng2;
       }
 
       const points = [];
@@ -472,10 +457,8 @@
       const dLng = targetLng - lng1;
       const chordDist = Math.sqrt(dLat * dLat + dLng * dLng);
 
-      // Arc apex calculation
       let controlLat, controlLng;
       if (isTransAtlanticEurasia) {
-        // High North Atlantic / Eurasian Great-Circle sweeping gracefully across Greenland/Scandinavia
         controlLat = Math.max(lat1, lat2) + 28;
         controlLng = (lng1 + targetLng) / 2;
       } else {
@@ -488,24 +471,20 @@
 
       for (let i = 0; i <= steps; i++) {
         const t = i / steps;
-        // Quadratic Bézier trajectory
         const lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * controlLat + t * t * lat2;
         let lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * controlLng + t * t * targetLng;
-
         points.push([lat, lng]);
       }
       return points;
     }
 
-    // High-curvature segments: Memphis direct to China across Atlantic/Eurasia without ocean-only Pacific detour
-    const seg1 = createCurvedPath(STOPS[0].coords, STOPS[1].coords, 0.45, 30);  // T5 Origin -> T4 Ginner (Memphis local)
-    const seg2 = createCurvedPath(STOPS[1].coords, STOPS[2].coords, 0.32, 160, true); // T4 Ginner (Memphis) -> T3 Spinner (Jiangsu, China) direct Great-Circle Arc
-    const seg3 = createCurvedPath(STOPS[2].coords, STOPS[3].coords, 0.50, 40);  // T3 Spinner -> T2 Fabric Mill (Jiangsu regional)
-    const seg4 = createCurvedPath(STOPS[3].coords, STOPS[4].coords, 0.28, 80);  // T2 Fabric Mill -> T1 Garment (China -> Vietnam)
+    const seg1 = createCurvedPath(STOPS[0].coords, STOPS[1].coords, 0.45, 30);
+    const seg2 = createCurvedPath(STOPS[1].coords, STOPS[2].coords, 0.32, 160, true);
+    const seg3 = createCurvedPath(STOPS[2].coords, STOPS[3].coords, 0.50, 40);
+    const seg4 = createCurvedPath(STOPS[3].coords, STOPS[4].coords, 0.28, 80);
 
     const routeSegments = [seg1, seg2, seg3, seg4];
 
-    // Combine all segments into one continuous route
     const fullRouteCoords = [
       ...seg1,
       ...seg2.slice(1),
@@ -513,10 +492,8 @@
       ...seg4.slice(1)
     ];
 
-    // Draw glowing curved polylines
     const legColors = ['#f59e0b', '#38bdf8', '#818cf8', '#14b8a6'];
     routeSegments.forEach((seg, idx) => {
-      // Glow background line
       L.polyline(seg, {
         color: legColors[idx],
         weight: 3,
@@ -524,7 +501,6 @@
         dashArray: '4, 8'
       }).addTo(map);
 
-      // Neon dash flowing line
       L.polyline(seg, {
         color: legColors[idx],
         weight: 3.5,
@@ -534,7 +510,7 @@
       }).addTo(map);
     });
 
-    // Tier Markers with Click Popups
+    // Tier Markers
     STOPS.forEach((stop) => {
       const customIcon = L.divIcon({
         className: 'custom-pin',
@@ -551,7 +527,6 @@
 
       const marker = L.marker(stop.coords, { icon: customIcon }).addTo(map);
 
-      // Clean, rich modal card popup
       const popupHtml = `
         <div class="w-56 sm:w-64 p-3.5 sm:p-4 space-y-2">
           <div class="flex items-center justify-between">
@@ -574,7 +549,6 @@
       `;
       marker.bindPopup(popupHtml, { maxWidth: 280, closeButton: false, offset: [0, -10] });
 
-      // Hover and touch tap to display details
       marker.on('mouseover', function () {
         this.openPopup();
       });
@@ -582,13 +556,11 @@
         this.closePopup();
       });
 
-      // Click / Touch to focus on marker
       marker.on('click', () => {
         map.flyTo(stop.coords, 6, { duration: 1.2 });
       });
     });
 
-    // Cotton Boll SVG for moving marker
     const cottonBollSvg = `
       <svg viewBox="0 0 48 48" class="w-full h-full drop-shadow-[0_4px_10px_rgba(255,255,255,0.45)]" xmlns="http://www.w3.org/2000/svg">
         <path d="M24 40 C20 44 14 39 12 33 C18 36 22 34 24 30 C26 34 30 36 36 33 C34 39 28 44 24 40 Z" fill="#855938" />
@@ -618,7 +590,6 @@
 
     const cargoMarker = L.marker(fullRouteCoords[0], { icon: cottonIcon, zIndexOffset: 1000 }).addTo(map);
 
-    // Cumulative indices for stage transitions
     const cumLengths = [
       seg1.length,
       seg1.length + seg2.length - 1,
@@ -629,10 +600,9 @@
     let animationFrameId = null;
     let isPlaying = false;
     let progress = 0;
-    let speedMultiplier = 0.5; // Starts at 0.5x
+    let speedMultiplier = 0.5;
     const totalPoints = fullRouteCoords.length;
 
-    // Elements for left status card
     const elActiveBadge = document.getElementById('activeTierBadge');
     const elActiveBadgeMini = document.getElementById('activeTierBadgeMini');
     const elFromTier = document.getElementById('statusFromTier');
@@ -689,7 +659,6 @@
       animationFrameId = requestAnimationFrame(animateMovement);
     }
 
-    // Play / Pause controls
     const btnPlay = document.getElementById('btnPlay');
     const playIcon = document.getElementById('playIcon');
     const playText = document.getElementById('playText');
@@ -707,13 +676,11 @@
       }
     });
 
-    // Overview reset
     document.getElementById('btnReset').addEventListener('click', () => {
       const bounds = L.latLngBounds(fullRouteCoords);
       map.fitBounds(bounds, { padding: [40, 40] });
     });
 
-    // Panel collapse / expand toggle
     const panelMobileHeader = document.getElementById('panelMobileHeader');
     const panelCollapsibleBody = document.getElementById('panelCollapsibleBody');
     const toggleText = document.getElementById('toggleText');
@@ -739,7 +706,6 @@
       });
     }
 
-    // Explicit Mode Switcher: Auto, Web, Mobile
     const btnModeAuto = document.getElementById('btnModeAuto');
     const btnModeWeb = document.getElementById('btnModeWeb');
     const btnModeMobile = document.getElementById('btnModeMobile');
@@ -762,7 +728,6 @@
         btnModeMobile.classList.remove('text-slate-400');
         setPanelState(false);
       } else {
-        // Auto mode based on window size
         btnModeAuto.classList.add('bg-sky-500', 'text-slate-950');
         btnModeAuto.classList.remove('text-slate-400');
         if (window.innerWidth < 640) {
@@ -778,7 +743,6 @@
     btnModeWeb.addEventListener('click', () => applyViewMode('web'));
     btnModeMobile.addEventListener('click', () => applyViewMode('mobile'));
 
-    // Speed controls
     document.querySelectorAll('.speed-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.speed-btn').forEach(b => {
@@ -791,53 +755,12 @@
       });
     });
 
-    // Product Picture Upload Logic (Supports localStorage caching)
-    const productImgInput = document.getElementById('productImgInput');
-    const emptyImagePrompt = document.getElementById('emptyImagePrompt');
-    const imagePreviewBox = document.getElementById('imagePreviewBox');
-    const productImageElement = document.getElementById('productImageElement');
-
-    function displayProductImage(dataUrl) {
-      productImageElement.src = dataUrl;
-      emptyImagePrompt.classList.add('hidden');
-      imagePreviewBox.classList.remove('hidden');
-    }
-
-    function removeProductImage() {
-      productImgInput.value = '';
-      productImageElement.src = '';
-      imagePreviewBox.classList.add('hidden');
-      emptyImagePrompt.classList.remove('hidden');
-      localStorage.removeItem('saved_product_image_1MG3058');
-    }
-
-    if (productImgInput) {
-      productImgInput.addEventListener('change', function(e) {
-        const file = e.target.files && e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(evt) {
-            const dataUrl = evt.target.result;
-            displayProductImage(dataUrl);
-            try {
-              localStorage.setItem('saved_product_image_1MG3058', dataUrl);
-            } catch (err) {
-              // Handle quota exceeded if file is excessively large
-            }
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    }
-
-    // Window load handler
     window.onload = function() {
       map.invalidateSize();
       const bounds = L.latLngBounds(fullRouteCoords);
       const isMobile = window.innerWidth < 640;
       map.fitBounds(bounds, { padding: isMobile ? [25, 25] : [45, 45] });
 
-      // Default panel state based on device
       if (isMobile) {
         setPanelState(false);
       } else {
@@ -845,12 +768,6 @@
       }
 
       updateStatusBox(0);
-
-      // Restore saved product picture from localStorage if present
-      const cachedImg = localStorage.getItem('saved_product_image_1MG3058');
-      if (cachedImg) {
-        displayProductImage(cachedImg);
-      }
 
       setTimeout(() => {
         map.invalidateSize();
