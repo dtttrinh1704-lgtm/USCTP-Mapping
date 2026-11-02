@@ -171,57 +171,56 @@
         </div>
       </div>
 
-      <!-- PO, Style No. & Full Product Name Information Section -->
-      <div class="mt-4 pt-3 border-t border-slate-800 space-y-2.5">
+      <!-- PO, Style No. & Product Name (Streamlined font sizes to fit 1 line) -->
+      <div class="mt-3.5 pt-3 border-t border-slate-800 space-y-2">
         <!-- 1. PO No. -->
         <div class="flex items-center justify-between">
-          <span class="text-[10px] uppercase tracking-wider font-semibold text-slate-400">PO No.</span>
-          <span class="text-xs font-bold font-mono text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 px-2 py-0.5 rounded-md">
+          <span class="text-[9px] uppercase tracking-wider font-semibold text-slate-400">PO No.</span>
+          <span class="text-[11px] font-bold font-mono text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 px-2 py-0.5 rounded">
             PO380048072
           </span>
         </div>
 
         <!-- 2. Style No. -->
         <div class="flex items-center justify-between">
-          <span class="text-[10px] uppercase tracking-wider font-semibold text-slate-400">Style No.</span>
-          <span class="text-xs font-bold font-mono text-sky-400 bg-sky-400/10 border border-sky-400/30 px-2 py-0.5 rounded-md">
+          <span class="text-[9px] uppercase tracking-wider font-semibold text-slate-400">Style No.</span>
+          <span class="text-[11px] font-bold font-mono text-sky-400 bg-sky-400/10 border border-sky-400/30 px-2 py-0.5 rounded">
             1MG3058
           </span>
         </div>
 
-        <!-- 3. Full Product Name -->
-        <div class="space-y-1 pt-0.5">
-          <span class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 block">Product Name</span>
-          <div class="text-xs font-bold text-amber-300 bg-amber-400/10 border border-amber-400/25 px-2.5 py-1.5 rounded-lg leading-relaxed break-words whitespace-normal shadow-sm">
+        <!-- 3. Product Name - Fits on 1 single line -->
+        <div class="flex items-center justify-between gap-1.5 pt-0.5">
+          <span class="text-[9px] uppercase tracking-wider font-semibold text-slate-400 shrink-0">Product</span>
+          <span class="text-[10px] font-bold text-amber-300 bg-amber-400/10 border border-amber-400/25 px-2 py-1 rounded truncate whitespace-nowrap text-right max-w-[200px]" title="MEN'S FOCUS TECH HOODIE REMIX">
             MEN'S FOCUS TECH HOODIE REMIX
-          </div>
+          </span>
         </div>
       </div>
 
-      <!-- Admin Product Image Upload Section (Compact 4:5 ratio) -->
-      <div class="mt-3.5 pt-3 border-t border-slate-800/90">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-[11px] font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <i class="fa-solid fa-camera text-sky-400 text-xs"></i> Product Image
+      <!-- Admin Product Image Upload Section (Removed '4:5' labels) -->
+      <div class="mt-3 pt-2.5 border-t border-slate-800/90">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[10px] font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-camera text-sky-400 text-[11px]"></i> Product Image
           </span>
         </div>
 
-        <!-- Centered compact box keeping strict 4:5 ratio -->
-        <div id="imageUploadContainer" class="relative group max-w-[150px] mx-auto">
+        <!-- Centered compact box maintaining 4:5 aspect ratio without text labels -->
+        <div id="imageUploadContainer" class="relative group max-w-[130px] mx-auto">
           <!-- Hidden File Input -->
           <input type="file" id="productImgInput" accept="image/*" class="hidden">
 
-          <!-- Dropzone / Empty State (Compact 4:5 ratio) -->
+          <!-- Dropzone / Empty State -->
           <div id="emptyImagePrompt" onclick="document.getElementById('productImgInput').click()" 
                class="cursor-pointer border-2 border-dashed border-slate-700/80 hover:border-sky-500/80 bg-slate-950/50 hover:bg-sky-500/5 rounded-xl aspect-[4/5] flex flex-col items-center justify-center p-2.5 text-center transition-all duration-200">
-            <div class="w-8 h-8 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-400 group-hover:text-sky-400 mb-1.5 transition-colors">
+            <div class="w-7 h-7 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-400 group-hover:text-sky-400 mb-1 transition-colors">
               <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
             </div>
             <p class="text-[10px] font-semibold text-slate-300">Upload Photo</p>
-            <p class="text-[8px] text-slate-500 mt-0.5 font-mono">4:5 ratio</p>
           </div>
 
-          <!-- Image Preview Display (Maintains strict 4:5 ratio) -->
+          <!-- Image Preview Display -->
           <div id="imagePreviewBox" class="hidden relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 aspect-[4/5] group/img shadow-md">
             <img id="productImageElement" src="" alt="Product 1MG3058" class="w-full h-full object-cover object-center">
             
