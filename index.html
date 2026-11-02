@@ -43,6 +43,12 @@
       z-index: -1;
     }
 
+    /* Invisible hover buffer area to make mouse interaction effortless */
+    .pin-hitbox {
+      padding: 10px;
+      margin: -10px;
+    }
+
     /* Dashed flow animation along routes */
     @keyframes dashFlow {
       to {
@@ -168,9 +174,9 @@
 
       <!-- Style Information Badge -->
       <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
-        <span class="text-[11px] uppercase tracking-wider font-semibold text-slate-400">Style No.</span>
+        <span class="text-[11px] uppercase tracking-wider font-semibold text-slate-400">PRODUCT NAME</span>
         <span class="text-xs font-bold font-mono text-amber-400 bg-amber-400/10 border border-amber-400/30 px-2.5 py-0.5 rounded-md">
-          1MG3058
+          MEN'S FOCUS TECH HOODIE REMIX
         </span>
       </div>
 
@@ -180,7 +186,7 @@
           <span class="text-[11px] font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
             <i class="fa-solid fa-camera text-sky-400 text-xs"></i> Product Image
           </span>
-          <span class="text-[10px] text-slate-500 font-mono">Admin Upload</span>
+          <span class="text-[10px] text-slate-500 font-mono">HOODIE</span>
         </div>
 
         <div id="imageUploadContainer" class="relative group">
@@ -242,9 +248,9 @@
         tag: "Tier 5 (T5)",
         role: "Raw Cotton Cultivation",
         company: "US Cotton Producers",
-        location: "Memphis, Tennessee, USA",
-        coords: [35.2500, -89.8800], // Greater Memphis agricultural area
-        details: "Origin: Seed cotton farming, harvest aggregation, and bale lot classification.",
+        location: "Jackson / West Tennessee, USA",
+        coords: [35.7500, -88.8200], // Spaced eastward in West Tennessee cotton belt
+        details: "Origin: Seed cotton farming.",
         color: "#f59e0b",
         icon: "fa-seedling"
       },
@@ -254,9 +260,9 @@
         tag: "Tier 4 (T4)",
         role: "Cotton Ginning Facility",
         company: "Tennessee Ginning Mill",
-        location: "Memphis, Tennessee, USA",
-        coords: [35.1495, -90.0490], // Memphis central logistics & ginning hub
-        details: "Ginning: Seed separation, lint cleaning, conditioning, and universal density bale packaging.",
+        location: "Memphis Hub, Tennessee, USA",
+        coords: [35.0800, -90.1500], // Memphis logistics & river port ginning hub
+        details: "Ginning: Seed separation, lint cleaning, conditioning, PBI labeling and bale packaging.",
         color: "#f97316",
         icon: "fa-boxes-packing"
       },
@@ -266,8 +272,8 @@
         tag: "Tier 3 (T3)",
         role: "Yarn Spinning Mill",
         company: "JIANGSU YUEDA COTTON SPINNING CO., LTD.",
-        location: "Jiangsu, China",
-        coords: [33.3473, 120.1636], // Yancheng, Jiangsu
+        location: "Yancheng, Jiangsu, China",
+        coords: [33.7200, 120.3500], // North Jiangsu coastal spinning cluster
         details: "Spinning: Converting raw cotton bales into fine-count combed and carded ring-spun yarn.",
         color: "#6366f1",
         icon: "fa-industry"
@@ -279,7 +285,7 @@
         role: "Weaving & Dyeing",
         company: "Changzhou Yuyuang Textile Ltd.",
         location: "Changzhou, Jiangsu, China",
-        coords: [31.8112, 119.9740], // Changzhou, Jiangsu
+        coords: [31.5500, 119.7200], // South Jiangsu / Taihu textile cluster (clearly separated from Yancheng)
         details: "Fabric Mill: Warp preparation, circular knitting / weaving, and finishing treatment.",
         color: "#a855f7",
         icon: "fa-scroll"
@@ -300,11 +306,11 @@
         id: "brand",
         tier: "Tier 0: Brand HQ",
         tag: "Tier 0 (T0)",
-        role: "Global Brand Headquarters",
+        role: "Global Brand Retailer",
         company: "On Brand (On Running)",
         location: "Zurich, Switzerland",
         coords: [47.3769, 8.5417], // Zurich
-        details: "Brand Headquarters: Final quality audit, design approval, marketing, and EU distribution hub.",
+        details: "Brand Retail Store",
         color: "#f43f5e",
         icon: "fa-flag-checkered"
       }
@@ -436,12 +442,14 @@
       const customIcon = L.divIcon({
         className: 'custom-pin',
         html: `
-          <div style="color: ${stop.color};" class="pulse-marker flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 border-2 border-current shadow-xl text-xs hover:scale-125 transition-transform duration-200 cursor-pointer">
-            <i class="fa-solid ${stop.icon}"></i>
+          <div class="pin-hitbox flex items-center justify-center">
+            <div style="color: ${stop.color};" class="pulse-marker flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 border-2 border-current shadow-xl text-xs hover:scale-125 transition-transform duration-200 cursor-pointer">
+              <i class="fa-solid ${stop.icon}"></i>
+            </div>
           </div>
         `,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16]
+        iconSize: [48, 48],
+        iconAnchor: [24, 24]
       });
 
       const marker = L.marker(stop.coords, { icon: customIcon }).addTo(map);
