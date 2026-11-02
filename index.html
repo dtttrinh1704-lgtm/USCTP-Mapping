@@ -93,7 +93,7 @@
           US Cotton Supply Chain Mapping
           <span class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium px-2 py-0.5 rounded-full">T5 &rarr; T0 Traceability</span>
         </h1>
-        <p class="text-xs text-slate-400">Tennessee, USA &rarr; Jiangsu, China &rarr; Nam Dinh, Vietnam &rarr; Zurich, Switzerland</p>
+        <p class="text-xs text-slate-400">Memphis, USA &rarr; Jiangsu, China &rarr; Nam Dinh, Vietnam &rarr; Zurich, Switzerland</p>
       </div>
     </div>
 
@@ -187,19 +187,19 @@
           <!-- Hidden File Input -->
           <input type="file" id="productImgInput" accept="image/*" class="hidden">
 
-          <!-- Dropzone / Empty State -->
+          <!-- Dropzone / Empty State (Ratio 4:5 for 1600x2000px images) -->
           <div id="emptyImagePrompt" onclick="document.getElementById('productImgInput').click()" 
-               class="cursor-pointer border-2 border-dashed border-slate-700/80 hover:border-sky-500/80 bg-slate-950/50 hover:bg-sky-500/5 rounded-xl p-3 text-center transition-all duration-200">
-            <div class="w-8 h-8 mx-auto rounded-full bg-slate-800/80 flex items-center justify-center text-slate-400 group-hover:text-sky-400 mb-1.5 transition-colors">
-              <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+               class="cursor-pointer border-2 border-dashed border-slate-700/80 hover:border-sky-500/80 bg-slate-950/50 hover:bg-sky-500/5 rounded-xl aspect-[4/5] flex flex-col items-center justify-center p-3 text-center transition-all duration-200">
+            <div class="w-10 h-10 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-400 group-hover:text-sky-400 mb-2 transition-colors">
+              <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
             </div>
-            <p class="text-[11px] font-medium text-slate-300">Click to upload product photo</p>
-            <p class="text-[9px] text-slate-500 mt-0.5">PNG, JPG, WebP (Max 5MB)</p>
+            <p class="text-[11px] font-semibold text-slate-300">Upload Product Photo</p>
+            <p class="text-[9px] text-slate-500 mt-1 font-mono">1600 &times; 2000 px (4:5 ratio)</p>
           </div>
 
-          <!-- Image Preview Display (Hidden initially until image uploaded) -->
-          <div id="imagePreviewBox" class="hidden relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 group/img">
-            <img id="productImageElement" src="" alt="Product 1MG3058" class="w-full h-36 object-cover object-center">
+          <!-- Image Preview Display (Maintains 4:5 ratio for 1600x2000px) -->
+          <div id="imagePreviewBox" class="hidden relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 aspect-[4/5] group/img">
+            <img id="productImageElement" src="" alt="Product 1MG3058" class="w-full h-full object-cover object-center">
             
             <!-- Quick Actions Overlay -->
             <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px] opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2">
@@ -227,9 +227,9 @@
     <!-- Speed Adjustment Widget -->
     <div class="absolute bottom-5 right-5 z-[1000] bg-slate-900/90 backdrop-blur-md border border-slate-800 px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-3">
       <span class="text-xs text-slate-400 font-medium">Speed:</span>
-      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30" data-speed="0.2">0.2x</button>
-      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="0.5">0.5x</button>
+      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30" data-speed="0.5">0.5x</button>
       <button class="speed-btn px-2.5 py-1 text-xs rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="1">1x</button>
+      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="2">2x</button>
     </div>
   </main>
 
@@ -242,8 +242,8 @@
         tag: "Tier 5 (T5)",
         role: "Raw Cotton Cultivation",
         company: "US Cotton Producers",
-        location: "Tennessee, USA",
-        coords: [35.5175, -89.0000], // Rural West Tennessee cotton farmland
+        location: "Memphis, Tennessee, USA",
+        coords: [35.2500, -89.8800], // Greater Memphis agricultural area
         details: "Origin: Seed cotton farming, harvest aggregation, and bale lot classification.",
         color: "#f59e0b",
         icon: "fa-seedling"
@@ -254,8 +254,8 @@
         tag: "Tier 4 (T4)",
         role: "Cotton Ginning Facility",
         company: "Tennessee Ginning Mill",
-        location: "Tennessee, USA",
-        coords: [35.1495, -90.0490], // Memphis logistics and gin hub
+        location: "Memphis, Tennessee, USA",
+        coords: [35.1495, -90.0490], // Memphis central logistics & ginning hub
         details: "Ginning: Seed separation, lint cleaning, conditioning, and universal density bale packaging.",
         color: "#f97316",
         icon: "fa-boxes-packing"
@@ -312,7 +312,7 @@
 
     // Initialize Leaflet Map
     const map = L.map('map', {
-      center: [28, 5],
+      center: [30, 20],
       zoom: 3,
       minZoom: 2,
       maxZoom: 12,
@@ -349,61 +349,55 @@
       });
     }
 
-    // Function to calculate smooth, high-fidelity curved arc (Great-Circle simulation)
-    function createCurvedPath(startCoord, endCoord, bendFactor = 0.25, steps = 100, isTransPacific = false) {
+    // Function to calculate smooth, high-fidelity curved arc (Direct Eastbound / Transcontinental)
+    function createCurvedPath(startCoord, endCoord, bendFactor = 0.25, steps = 100, isTransAtlanticEurasia = false) {
       const lat1 = startCoord[0];
       const lng1 = startCoord[1];
       const lat2 = endCoord[0];
       const lng2 = endCoord[1];
 
-      let adjustedLng2 = lng2;
-      // Handle trans-Pacific and global longitude wrapping
-      if (lng1 < 0 && lng2 > 0 && Math.abs(lng2 - lng1) > 180) {
-        adjustedLng2 = lng2 - 360;
-      } else if (lng1 > 0 && lng2 < 0 && Math.abs(lng1 - lng2) > 180) {
-        adjustedLng2 = lng2 + 360;
+      let targetLng = lng2;
+      // When flying eastward from USA (-90) to China (+120) across Atlantic & Eurasia
+      if (isTransAtlanticEurasia && lng1 < 0 && lng2 > 0) {
+        targetLng = lng2; // Direct eastward positive traversal across 0° prime meridian
       }
 
       const points = [];
       const dLat = lat2 - lat1;
-      const dLng = adjustedLng2 - lng1;
+      const dLng = targetLng - lng1;
       const chordDist = Math.sqrt(dLat * dLat + dLng * dLng);
 
       // Arc apex calculation
       let controlLat, controlLng;
-      if (isTransPacific) {
-        // High North-Pacific Great-Circle arch (sweeping gracefully across high latitudes)
-        controlLat = Math.max(lat1, lat2) + 26; 
-        controlLng = (lng1 + adjustedLng2) / 2;
+      if (isTransAtlanticEurasia) {
+        // High North Atlantic / Eurasian Great-Circle sweeping gracefully across Greenland/Scandinavia
+        controlLat = Math.max(lat1, lat2) + 28;
+        controlLng = (lng1 + targetLng) / 2;
       } else {
-        // Perpendicular vector for the apex of regional arcs
         const normLat = -dLng / (chordDist || 1);
         const normLng = dLat / (chordDist || 1);
         const arcHeight = chordDist * bendFactor;
         controlLat = (lat1 + lat2) / 2 + normLat * arcHeight;
-        controlLng = (lng1 + adjustedLng2) / 2 + normLng * arcHeight;
+        controlLng = (lng1 + targetLng) / 2 + normLng * arcHeight;
       }
 
       for (let i = 0; i <= steps; i++) {
         const t = i / steps;
-        // Quadratic Bézier curved trajectory
+        // Quadratic Bézier trajectory
         const lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * controlLat + t * t * lat2;
-        let lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * controlLng + t * t * adjustedLng2;
-
-        if (lng < -180) lng += 360;
-        if (lng > 180) lng -= 360;
+        let lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * controlLng + t * t * targetLng;
 
         points.push([lat, lng]);
       }
       return points;
     }
 
-    // High-curvature segments for visually pronounced, graceful arcs
-    const seg1 = createCurvedPath(STOPS[0].coords, STOPS[1].coords, 0.45, 40);  // T5 Farm -> T4 Gin (Tennessee curve)
-    const seg2 = createCurvedPath(STOPS[1].coords, STOPS[2].coords, 0.45, 160, true); // T4 Gin -> T3 Spinner (Pronounced North-Pacific Great-Circle Arc)
-    const seg3 = createCurvedPath(STOPS[2].coords, STOPS[3].coords, 0.50, 45);  // T3 Spinner -> T2 Fabric Mill (Curved regional)
+    // High-curvature segments: Memphis direct to China across Atlantic/Eurasia without ocean-only Pacific detour
+    const seg1 = createCurvedPath(STOPS[0].coords, STOPS[1].coords, 0.45, 30);  // T5 Origin -> T4 Ginner (Memphis local)
+    const seg2 = createCurvedPath(STOPS[1].coords, STOPS[2].coords, 0.32, 160, true); // T4 Ginner (Memphis) -> T3 Spinner (Jiangsu, China) direct Great-Circle Arc
+    const seg3 = createCurvedPath(STOPS[2].coords, STOPS[3].coords, 0.50, 40);  // T3 Spinner -> T2 Fabric Mill (Jiangsu regional)
     const seg4 = createCurvedPath(STOPS[3].coords, STOPS[4].coords, 0.28, 80);  // T2 Fabric Mill -> T1 Garment (China -> Vietnam)
-    const seg5 = createCurvedPath(STOPS[4].coords, STOPS[5].coords, 0.24, 120); // T1 Garment -> T0 Brand HQ (Vietnam -> Swiss Eurasian Arc)
+    const seg5 = createCurvedPath(STOPS[4].coords, STOPS[5].coords, 0.25, 120); // T1 Garment -> T0 Brand HQ (Vietnam -> Zurich, Swiss)
 
     const routeSegments = [seg1, seg2, seg3, seg4, seg5];
 
@@ -531,7 +525,7 @@
     let animationFrameId = null;
     let isPlaying = false;
     let progress = 0;
-    let speedMultiplier = 0.2;
+    let speedMultiplier = 0.5; // Starts at 0.5x
     const totalPoints = fullRouteCoords.length;
 
     // Elements for left status card
