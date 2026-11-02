@@ -112,10 +112,9 @@
         <i class="fa-solid fa-expand"></i> <span>Overview</span>
       </button>
 
-      <!-- Map Style Selector -->
+      <!-- Map Style Selector (Removed Dark Theme) -->
       <select id="tileSelector" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-2 outline-none focus:border-sky-500 cursor-pointer">
         <option value="osm" selected>Standard Map (OSM)</option>
-        <option value="dark">Dark Theme</option>
         <option value="satellite">Satellite View</option>
       </select>
     </div>
@@ -327,13 +326,8 @@
 
     L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
-    // Free tile layer options
+    // Free tile layer options (OSM default, Satellite alternative)
     const tileLayers = {
-      dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; CARTO &copy; OpenStreetMap',
-        subdomains: 'abcd',
-        maxZoom: 19
-      }),
       osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19
