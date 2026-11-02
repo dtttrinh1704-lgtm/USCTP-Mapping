@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Supply Chain Journey Map - Miễn Phí 100%</title>
+  <title>US Cotton Supply Chain Journey Map</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Leaflet CSS & JS (Thư viện bản đồ mã nguồn mở miễn phí, không cần API Key) -->
+  <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   
@@ -25,10 +25,10 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
     
-    /* Animation cho hiệu ứng nhịp đập của trạm */
+    /* Animation for marker pulse effect */
     @keyframes pulse-ring {
       0% { transform: scale(0.6); opacity: 0.9; }
-      80%, 100% { transform: scale(2.4); opacity: 0; }
+      80%, 100% { transform: scale(2.2); opacity: 0; }
     }
     .pulse-marker {
       position: relative;
@@ -36,37 +36,42 @@
     .pulse-marker::after {
       content: '';
       position: absolute;
-      top: -6px; left: -6px; right: -6px; bottom: -6px;
+      top: -5px; left: -5px; right: -5px; bottom: -5px;
       border-radius: 9999px;
       background: currentColor;
-      animation: pulse-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+      animation: pulse-ring 2.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
       z-index: -1;
     }
 
-    /* Hiệu ứng nét đứt chạy dọc theo tuyến đường */
+    /* Dashed flow animation along routes */
     @keyframes dashFlow {
       to {
-        stroke-dashoffset: -40;
+        stroke-dashoffset: -36;
       }
     }
     .route-animated {
-      animation: dashFlow 1.4s linear infinite;
+      animation: dashFlow 1.6s linear infinite;
     }
 
-    /* Tùy chỉnh popup leaflet đẹp mắt */
+    /* Custom Leaflet popup styling */
     .leaflet-popup-content-wrapper {
-      background: #0f172a;
+      background: #090d16;
       color: #f8fafc;
-      border-radius: 12px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-      border: 1px solid #334155;
-      padding: 4px;
+      border-radius: 14px;
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.7);
+      border: 1px solid #1e293b;
+      padding: 0;
+      overflow: hidden;
+    }
+    .leaflet-popup-content {
+      margin: 0;
+      line-height: 1.4;
     }
     .leaflet-popup-tip {
-      background: #0f172a;
+      background: #090d16;
     }
 
-    /* Đảm bảo khung Leaflet luôn lấp đầy không gian */
+    /* Ensure container stretches properly */
     #map {
       width: 100%;
       height: 100%;
@@ -77,8 +82,8 @@
 </head>
 <body class="bg-slate-950 text-slate-100 flex flex-col h-screen overflow-hidden">
 
-  <!-- Header thanh công cụ trên cùng -->
-  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 z-10 shadow-lg">
+  <!-- Header -->
+  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-6 py-3 flex flex-wrap items-center justify-between gap-4 z-10 shadow-lg">
     <div class="flex items-center space-x-3">
       <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
         <i class="fa-solid fa-route text-lg"></i>
@@ -86,179 +91,237 @@
       <div>
         <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
           US Cotton Supply Chain Mapping
-          <span class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium px-2 py-0.5 rounded-full">Simulation Mode</span>
+          <span class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium px-2 py-0.5 rounded-full">T5 &rarr; T0 Traceability</span>
         </h1>
-        <p class="text-xs text-slate-400">Memphis (USA) &rarr; Ninh Ba (China) &rarr; Hải Phòng (Vietnam)</p>
+        <p class="text-xs text-slate-400">Tennessee, USA &rarr; Jiangsu, China &rarr; Nam Dinh, Vietnam &rarr; Zurich, Switzerland</p>
       </div>
     </div>
 
-    <!-- Nút điều khiển tương tác nhanh -->
+    <!-- Quick controls -->
     <div class="flex items-center space-x-2">
       <button id="btnPlay" class="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs transition-all shadow-md hover:shadow-sky-500/25 flex items-center gap-2">
-        <i class="fa-solid fa-play" id="playIcon"></i> <span id="playText">Bắt Đầu Mô Phỏng</span>
+        <i class="fa-solid fa-play" id="playIcon"></i> <span id="playText">Start Simulation</span>
       </button>
-      <button id="btnReset" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs transition border border-slate-700 flex items-center gap-1.5" title="Xem toàn cảnh">
-        <i class="fa-solid fa-expand"></i> <span>Toàn cảnh</span>
+      <button id="btnReset" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs transition border border-slate-700 flex items-center gap-1.5" title="Overview">
+        <i class="fa-solid fa-expand"></i> <span>Overview</span>
       </button>
 
-      <!-- Bộ chọn loại bản đồ miễn phí -->
+      <!-- Map Style Selector -->
       <select id="tileSelector" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-2 outline-none focus:border-sky-500 cursor-pointer">
-        <option value="dark">Chế độ Tối (Dark)</option>
-        <option value="osm">Bản đồ Chuẩn (OSM)</option>
-        <option value="satellite">Ảnh Vệ Tinh (Satellite)</option>
+        <option value="dark">Dark Theme</option>
+        <option value="osm">Standard Map (OSM)</option>
+        <option value="satellite">Satellite View</option>
       </select>
     </div>
   </header>
 
-  <!-- Phần hiển thị chính: Bản đồ + Bảng hành trình -->
+  <!-- Main Viewport: Map + Simplified Left Status Box -->
   <main class="relative flex-1 w-full h-full overflow-hidden">
     <!-- Map Container -->
     <div id="map" class="w-full h-full"></div>
 
-    <!-- Card hành trình cố định góc trái màn hình -->
-    <div class="absolute top-4 left-4 z-[1000] w-[calc(100%-2rem)] sm:w-96 max-h-[calc(100%-2rem)] overflow-y-auto bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl p-4 sm:p-5 transition-all">
+    <!-- Clean Left Floating Status Panel (Only Cotton Movement Info) -->
+    <div class="absolute top-4 left-4 z-[1000] w-[calc(100%-2rem)] sm:w-80 bg-slate-900/95 backdrop-blur-xl border border-slate-800/90 rounded-2xl shadow-2xl p-5 transition-all">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-        <div>
-          <span class="text-[11px] font-semibold tracking-wider text-sky-400 uppercase">Tiến Độ Hành Trình</span>
-          <h2 class="text-sm font-bold text-slate-100">Lộ Trình Vật Liệu Từng Chặng</h2>
+        <div class="flex items-center gap-2">
+          <span class="relative flex h-2.5 w-2.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <span class="text-[11px] font-semibold tracking-wider text-slate-300 uppercase">Live Cotton Movement</span>
         </div>
-        <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md font-mono" id="currentMilestoneLabel">Sẵn sàng</span>
+        <span id="activeTierBadge" class="text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-full">T5 &rarr; T4</span>
       </div>
 
-      <!-- Danh sách các chặng (Stages) -->
+      <!-- Live Dispatch Route Indicator -->
       <div class="mt-4 space-y-4">
-        
-        <!-- Chặng 1: Memphis (Nguyên liệu thô) -->
-        <div id="step-card-0" class="cursor-pointer transition-all p-3 rounded-xl border border-sky-500/40 bg-sky-500/10 hover:border-sky-400 group">
-          <div class="flex items-start gap-3">
-            <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center font-bold text-xs shrink-0">
-              <i class="fa-solid fa-boxes-stacked"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-slate-100 group-hover:text-sky-300">1. Xuất phát: Memphis, USA</span>
-                <span class="text-[10px] text-amber-400 font-medium bg-amber-500/10 px-1.5 py-0.5 rounded">Raw Material</span>
-              </div>
-              <p class="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed">
-                Nguyên vật liệu thô (bông & sợi tổng hợp) được thu mua và đóng gói tại trung tâm logistics Memphis, Tennessee.
-              </p>
-              <div class="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
-                <span><i class="fa-solid fa-calendar-day mr-1"></i>01/10/2026</span>
-                <span><i class="fa-solid fa-truck-front mr-1"></i>Đường bộ + Hàng hải</span>
-              </div>
-            </div>
+        <!-- Origin Node -->
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 text-sky-400 flex items-center justify-center shrink-0 text-xs shadow-inner">
+            <i class="fa-solid fa-circle-dot text-[10px]"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="text-[10px] uppercase font-semibold text-slate-400">Current Departure</div>
+            <div id="statusFromTier" class="text-xs font-bold text-slate-100 truncate">Tier 5: Origin</div>
+            <div id="statusFromPlace" class="text-[11px] text-slate-400 truncate">Tennessee, USA</div>
           </div>
         </div>
 
-        <!-- Chặng 2: Trung Quốc (Gia công/Sản xuất) -->
-        <div id="step-card-1" class="cursor-pointer transition-all p-3 rounded-xl border border-slate-800 bg-slate-800/40 hover:border-slate-700 group">
-          <div class="flex items-start gap-3">
-            <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 flex items-center justify-center font-bold text-xs shrink-0">
-              <i class="fa-solid fa-industry"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-slate-200 group-hover:text-indigo-300">2. Nhà máy: Ninh Ba, TQ</span>
-                <span class="text-[10px] text-indigo-400 font-medium bg-indigo-500/10 px-1.5 py-0.5 rounded">Processing</span>
-              </div>
-              <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                Vải cuộn và linh kiện phụ trợ được gia công bán thành phẩm tại nhà xưởng công nghiệp Ninh Ba (Ningbo).
-              </p>
-              <div class="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
-                <span><i class="fa-solid fa-calendar-day mr-1"></i>18/10/2026</span>
-                <span><i class="fa-solid fa-ship mr-1"></i>Tàu biển vượt Thái Bình Dương</span>
-              </div>
-            </div>
-          </div>
+        <!-- Connection animated line -->
+        <div class="flex items-center pl-4 -my-2.5 text-slate-500">
+          <div class="h-6 w-0.5 bg-gradient-to-b from-sky-400/80 via-emerald-400/80 to-indigo-400/80 ml-[3px]"></div>
+          <i class="fa-solid fa-arrow-down text-[10px] ml-3 text-sky-400 animate-bounce"></i>
         </div>
 
-        <!-- Chặng 3: Việt Nam (Hoàn thiện sản phẩm) -->
-        <div id="step-card-2" class="cursor-pointer transition-all p-3 rounded-xl border border-slate-800 bg-slate-800/40 hover:border-slate-700 group">
-          <div class="flex items-start gap-3">
-            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center font-bold text-xs shrink-0">
-              <i class="fa-solid fa-circle-check"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-slate-200 group-hover:text-emerald-300">3. Đích đến: Hải Phòng, VN</span>
-                <span class="text-[10px] text-emerald-400 font-medium bg-emerald-500/10 px-1.5 py-0.5 rounded">Finished Goods</span>
-              </div>
-              <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                Lắp ráp khâu cuối, kiểm định chất lượng (QC) và đóng gói sẵn sàng xuất khẩu tại khu kinh tế Đình Vũ - Hải Phòng.
-              </p>
-              <div class="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
-                <span><i class="fa-solid fa-calendar-day mr-1"></i>28/10/2026</span>
-                <span><i class="fa-solid fa-anchor mr-1"></i>Cảng Đình Vũ</span>
-              </div>
-            </div>
+        <!-- Destination Node -->
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 text-emerald-400 flex items-center justify-center shrink-0 text-xs shadow-inner">
+            <i class="fa-solid fa-location-dot text-xs"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="text-[10px] uppercase font-semibold text-slate-400">Next Destination</div>
+            <div id="statusToTier" class="text-xs font-bold text-slate-100 truncate">Tier 4: Ginner</div>
+            <div id="statusToPlace" class="text-[11px] text-slate-400 truncate">Tennessee, USA</div>
           </div>
         </div>
-
       </div>
 
-      <!-- Thống kê tổng quãng đường -->
-      <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-        <div>Tổng chặng: <span class="font-bold text-slate-200">~15,200 km</span></div>
-        <div>Thời gian di chuyển: <span class="font-bold text-sky-400">27 ngày</span></div>
+      <!-- Style Information Badge -->
+      <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+        <span class="text-[11px] uppercase tracking-wider font-semibold text-slate-400">Style No.</span>
+        <span class="text-xs font-bold font-mono text-amber-400 bg-amber-400/10 border border-amber-400/30 px-2.5 py-0.5 rounded-md">
+          1MG3058
+        </span>
+      </div>
+
+      <!-- Admin Product Image Upload Section -->
+      <div class="mt-3.5 pt-3 border-t border-slate-800/90">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[11px] font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-camera text-sky-400 text-xs"></i> Product Image
+          </span>
+          <span class="text-[10px] text-slate-500 font-mono">Admin Upload</span>
+        </div>
+
+        <div id="imageUploadContainer" class="relative group">
+          <!-- Hidden File Input -->
+          <input type="file" id="productImgInput" accept="image/*" class="hidden">
+
+          <!-- Dropzone / Empty State -->
+          <div id="emptyImagePrompt" onclick="document.getElementById('productImgInput').click()" 
+               class="cursor-pointer border-2 border-dashed border-slate-700/80 hover:border-sky-500/80 bg-slate-950/50 hover:bg-sky-500/5 rounded-xl p-3 text-center transition-all duration-200">
+            <div class="w-8 h-8 mx-auto rounded-full bg-slate-800/80 flex items-center justify-center text-slate-400 group-hover:text-sky-400 mb-1.5 transition-colors">
+              <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+            </div>
+            <p class="text-[11px] font-medium text-slate-300">Click to upload product photo</p>
+            <p class="text-[9px] text-slate-500 mt-0.5">PNG, JPG, WebP (Max 5MB)</p>
+          </div>
+
+          <!-- Image Preview Display (Hidden initially until image uploaded) -->
+          <div id="imagePreviewBox" class="hidden relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 group/img">
+            <img id="productImageElement" src="" alt="Product 1MG3058" class="w-full h-36 object-cover object-center">
+            
+            <!-- Quick Actions Overlay -->
+            <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px] opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2">
+              <button onclick="document.getElementById('productImgInput').click()" class="px-2.5 py-1.5 rounded-lg bg-sky-500/90 hover:bg-sky-400 text-slate-950 text-[11px] font-bold shadow-md flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-arrows-rotate text-[10px]"></i> Change
+              </button>
+              <button onclick="removeProductImage()" class="px-2.5 py-1.5 rounded-lg bg-rose-500/90 hover:bg-rose-400 text-white text-[11px] font-bold shadow-md flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-trash-can text-[10px]"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map interaction note -->
+      <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+        <div class="flex items-center gap-1.5">
+          <i class="fa-solid fa-arrow-pointer text-sky-400 text-[10px]"></i>
+          <span>Hover tier icons for details</span>
+        </div>
+        <span class="text-[10px] text-slate-500 font-mono">T5 &rarr; T0</span>
       </div>
     </div>
 
-    <!-- Widget chọn tốc độ mô phỏng -->
+    <!-- Speed Adjustment Widget -->
     <div class="absolute bottom-5 right-5 z-[1000] bg-slate-900/90 backdrop-blur-md border border-slate-800 px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-3">
-      <span class="text-xs text-slate-400 font-medium">Tốc độ:</span>
-      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30" data-speed="1">1x</button>
-      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="2">2x</button>
-      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="4">4x</button>
+      <span class="text-xs text-slate-400 font-medium">Speed:</span>
+      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30" data-speed="0.2">0.2x</button>
+      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="0.5">0.5x</button>
+      <button class="speed-btn px-2.5 py-1 text-xs rounded bg-slate-800 text-slate-400 hover:text-white" data-speed="1">1x</button>
     </div>
   </main>
 
   <script>
-    // Tọa độ 3 điểm mấu chốt
+    // Supply Chain Nodes: T5 -> T4 -> T3 -> T2 -> T1 -> T0
     const STOPS = [
       {
-        id: "memphis",
-        name: "Memphis, Tennessee (USA)",
-        type: "Raw Material",
-        coords: [35.1495, -90.0490],
-        date: "01 Tháng 10, 2026",
-        details: "Điểm xuất phát: Thu gom nguyên vật liệu sợi bông & hóa chất hữu cơ.",
+        id: "origin",
+        tier: "Tier 5: Origin",
+        tag: "Tier 5 (T5)",
+        role: "Raw Cotton Cultivation",
+        company: "US Cotton Producers",
+        location: "Tennessee, USA",
+        coords: [35.5175, -89.0000], // Rural West Tennessee cotton farmland
+        details: "Origin: Seed cotton farming, harvest aggregation, and bale lot classification.",
         color: "#f59e0b",
-        icon: "fa-boxes-stacked"
+        icon: "fa-seedling"
       },
       {
-        id: "china",
-        name: "Ninh Ba (Ningbo), Trung Quốc",
-        type: "Processing & Manufacturing",
-        coords: [29.8683, 121.5440],
-        date: "18 Tháng 10, 2026",
-        details: "Nhà máy chính: Dệt, tiền xử lý và cắt định hình theo bản thiết kế.",
+        id: "ginner",
+        tier: "Tier 4: Ginner",
+        tag: "Tier 4 (T4)",
+        role: "Cotton Ginning Facility",
+        company: "Tennessee Ginning Mill",
+        location: "Tennessee, USA",
+        coords: [35.1495, -90.0490], // Memphis logistics and gin hub
+        details: "Ginning: Seed separation, lint cleaning, conditioning, and universal density bale packaging.",
+        color: "#f97316",
+        icon: "fa-boxes-packing"
+      },
+      {
+        id: "spinner",
+        tier: "Tier 3: Spinner",
+        tag: "Tier 3 (T3)",
+        role: "Yarn Spinning Mill",
+        company: "JIANGSU YUEDA COTTON SPINNING CO., LTD.",
+        location: "Jiangsu, China",
+        coords: [33.3473, 120.1636], // Yancheng, Jiangsu
+        details: "Spinning: Converting raw cotton bales into fine-count combed and carded ring-spun yarn.",
         color: "#6366f1",
         icon: "fa-industry"
       },
       {
-        id: "vietnam",
-        name: "Hải Phòng, Việt Nam",
-        type: "Finished Goods & QC",
-        coords: [20.8449, 106.6881],
-        date: "28 Tháng 10, 2026",
-        details: "Thành phẩm: Hoàn thiện gia công đường may cuối, đóng hộp và bàn giao kho.",
-        color: "#10b981",
-        icon: "fa-circle-check"
+        id: "textile",
+        tier: "Tier 2: Fabric Mill",
+        tag: "Tier 2 (T2)",
+        role: "Weaving & Dyeing",
+        company: "Changzhou Yuyuang Textile Ltd.",
+        location: "Changzhou, Jiangsu, China",
+        coords: [31.8112, 119.9740], // Changzhou, Jiangsu
+        details: "Fabric Mill: Warp preparation, circular knitting / weaving, and finishing treatment.",
+        color: "#a855f7",
+        icon: "fa-scroll"
+      },
+      {
+        id: "garment",
+        tier: "Tier 1: Garment Factory",
+        tag: "Tier 1 (T1)",
+        role: "Apparel Manufacturing",
+        company: "Youngone Corporation",
+        location: "Nam Dinh, Vietnam",
+        coords: [20.4200, 106.1683], // Nam Dinh
+        details: "Garment Factory: Pattern cutting, sewing assembly, finished garment QC, and retail packing.",
+        color: "#14b8a6",
+        icon: "fa-shirt"
+      },
+      {
+        id: "brand",
+        tier: "Tier 0: Brand HQ",
+        tag: "Tier 0 (T0)",
+        role: "Global Brand Headquarters",
+        company: "On Brand (On Running)",
+        location: "Zurich, Switzerland",
+        coords: [47.3769, 8.5417], // Zurich
+        details: "Brand Headquarters: Final quality audit, design approval, marketing, and EU distribution hub.",
+        color: "#f43f5e",
+        icon: "fa-flag-checkered"
       }
     ];
 
-    // Khởi tạo Leaflet Map
+    // Initialize Leaflet Map
     const map = L.map('map', {
       center: [28, 5],
       zoom: 3,
       minZoom: 2,
-      maxZoom: 10,
+      maxZoom: 12,
       zoomControl: false
     });
 
     L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
-    // 3 nguồn Tile layer miễn phí 100% không giới hạn
+    // Free tile layer options
     const tileLayers = {
       dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; CARTO &copy; OpenStreetMap',
@@ -277,7 +340,6 @@
 
     let currentTileLayer = tileLayers.dark.addTo(map);
 
-    // Chuyển đổi tile
     const tileSelector = document.getElementById('tileSelector');
     if (tileSelector) {
       tileSelector.addEventListener('change', (e) => {
@@ -287,28 +349,46 @@
       });
     }
 
-    // Hàm tạo đường cong mô phỏng đường bay/tàu biển vượt Thái Bình Dương
-    function createCurvedPath(startCoord, endCoord, bendFactor = 0.15) {
+    // Function to calculate smooth, high-fidelity curved arc (Great-Circle simulation)
+    function createCurvedPath(startCoord, endCoord, bendFactor = 0.25, steps = 100, isTransPacific = false) {
       const lat1 = startCoord[0];
       const lng1 = startCoord[1];
       const lat2 = endCoord[0];
       const lng2 = endCoord[1];
 
       let adjustedLng2 = lng2;
+      // Handle trans-Pacific and global longitude wrapping
       if (lng1 < 0 && lng2 > 0 && Math.abs(lng2 - lng1) > 180) {
         adjustedLng2 = lng2 - 360;
+      } else if (lng1 > 0 && lng2 < 0 && Math.abs(lng1 - lng2) > 180) {
+        adjustedLng2 = lng2 + 360;
       }
 
       const points = [];
-      const steps = 80;
+      const dLat = lat2 - lat1;
+      const dLng = adjustedLng2 - lng1;
+      const chordDist = Math.sqrt(dLat * dLat + dLng * dLng);
 
-      const midLat = (lat1 + lat2) / 2 + Math.abs(adjustedLng2 - lng1) * bendFactor;
-      const midLng = (lng1 + adjustedLng2) / 2;
+      // Arc apex calculation
+      let controlLat, controlLng;
+      if (isTransPacific) {
+        // High North-Pacific Great-Circle arch (sweeping gracefully across high latitudes)
+        controlLat = Math.max(lat1, lat2) + 26; 
+        controlLng = (lng1 + adjustedLng2) / 2;
+      } else {
+        // Perpendicular vector for the apex of regional arcs
+        const normLat = -dLng / (chordDist || 1);
+        const normLng = dLat / (chordDist || 1);
+        const arcHeight = chordDist * bendFactor;
+        controlLat = (lat1 + lat2) / 2 + normLat * arcHeight;
+        controlLng = (lng1 + adjustedLng2) / 2 + normLng * arcHeight;
+      }
 
       for (let i = 0; i <= steps; i++) {
         const t = i / steps;
-        const lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * midLat + t * t * lat2;
-        let lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * midLng + t * t * adjustedLng2;
+        // Quadratic Bézier curved trajectory
+        const lat = (1 - t) * (1 - t) * lat1 + 2 * (1 - t) * t * controlLat + t * t * lat2;
+        let lng = (1 - t) * (1 - t) * lng1 + 2 * (1 - t) * t * controlLng + t * t * adjustedLng2;
 
         if (lng < -180) lng += 360;
         if (lng > 180) lng -= 360;
@@ -318,24 +398,51 @@
       return points;
     }
 
-    const segment1Coords = createCurvedPath(STOPS[0].coords, STOPS[1].coords, 0.22);
-    const segment2Coords = createCurvedPath(STOPS[1].coords, STOPS[2].coords, 0.05);
-    const fullRouteCoords = [...segment1Coords, ...segment2Coords.slice(1)];
+    // High-curvature segments for visually pronounced, graceful arcs
+    const seg1 = createCurvedPath(STOPS[0].coords, STOPS[1].coords, 0.45, 40);  // T5 Farm -> T4 Gin (Tennessee curve)
+    const seg2 = createCurvedPath(STOPS[1].coords, STOPS[2].coords, 0.45, 160, true); // T4 Gin -> T3 Spinner (Pronounced North-Pacific Great-Circle Arc)
+    const seg3 = createCurvedPath(STOPS[2].coords, STOPS[3].coords, 0.50, 45);  // T3 Spinner -> T2 Fabric Mill (Curved regional)
+    const seg4 = createCurvedPath(STOPS[3].coords, STOPS[4].coords, 0.28, 80);  // T2 Fabric Mill -> T1 Garment (China -> Vietnam)
+    const seg5 = createCurvedPath(STOPS[4].coords, STOPS[5].coords, 0.24, 120); // T1 Garment -> T0 Brand HQ (Vietnam -> Swiss Eurasian Arc)
 
-    // Đường mờ nền
-    L.polyline(segment1Coords, { color: '#38bdf8', weight: 3, opacity: 0.35, dashArray: '4, 8' }).addTo(map);
-    L.polyline(segment2Coords, { color: '#34d399', weight: 3, opacity: 0.35, dashArray: '4, 8' }).addTo(map);
+    const routeSegments = [seg1, seg2, seg3, seg4, seg5];
 
-    // Đường nét đứt chuyển động neon
-    L.polyline(segment1Coords, { color: '#38bdf8', weight: 3.5, opacity: 0.9, dashArray: '10, 15', className: 'route-animated' }).addTo(map);
-    L.polyline(segment2Coords, { color: '#34d399', weight: 3.5, opacity: 0.9, dashArray: '10, 15', className: 'route-animated' }).addTo(map);
+    // Combine all segments into one continuous route
+    const fullRouteCoords = [
+      ...seg1,
+      ...seg2.slice(1),
+      ...seg3.slice(1),
+      ...seg4.slice(1),
+      ...seg5.slice(1)
+    ];
 
-    // Đặt pin cho các trạm
-    STOPS.forEach((stop, index) => {
+    // Draw glowing curved polylines
+    const legColors = ['#f59e0b', '#38bdf8', '#818cf8', '#a855f7', '#f43f5e'];
+    routeSegments.forEach((seg, idx) => {
+      // Glow background line
+      L.polyline(seg, {
+        color: legColors[idx],
+        weight: 3,
+        opacity: 0.35,
+        dashArray: '4, 8'
+      }).addTo(map);
+
+      // Neon dash flowing line
+      L.polyline(seg, {
+        color: legColors[idx],
+        weight: 3.5,
+        opacity: 0.9,
+        dashArray: '10, 15',
+        className: 'route-animated'
+      }).addTo(map);
+    });
+
+    // Tier Markers with Click Popups
+    STOPS.forEach((stop) => {
       const customIcon = L.divIcon({
         className: 'custom-pin',
         html: `
-          <div style="color: ${stop.color};" class="pulse-marker flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 border-2 border-current shadow-lg text-xs">
+          <div style="color: ${stop.color};" class="pulse-marker flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 border-2 border-current shadow-xl text-xs hover:scale-125 transition-transform duration-200 cursor-pointer">
             <i class="fa-solid ${stop.icon}"></i>
           </div>
         `,
@@ -345,57 +452,124 @@
 
       const marker = L.marker(stop.coords, { icon: customIcon }).addTo(map);
 
-      const popupContent = `
-        <div class="p-2 space-y-1">
-          <div class="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
-            <i class="fa-solid fa-location-dot" style="color: ${stop.color}"></i> ${stop.type}
+      // Clean, rich modal card popup
+      const popupHtml = `
+        <div class="w-64 p-4 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style="background-color: ${stop.color}20; color: ${stop.color}; border: 1px solid ${stop.color}40;">
+              ${stop.tag}
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">${stop.role}</span>
           </div>
-          <div class="font-bold text-sm text-white">${stop.name}</div>
-          <p class="text-xs text-slate-300 mt-1">${stop.details}</p>
-          <div class="text-[11px] text-sky-400 font-mono mt-1 pt-1 border-t border-slate-800">
-            Ngày: ${stop.date}
+          <div>
+            <h3 class="text-sm font-bold text-white leading-tight">${stop.company}</h3>
+            <div class="text-xs text-sky-400 flex items-center gap-1.5 mt-0.5">
+              <i class="fa-solid fa-location-dot text-[11px]"></i>
+              <span>${stop.location}</span>
+            </div>
           </div>
+          <p class="text-xs text-slate-300 leading-relaxed border-t border-slate-800 pt-2">
+            ${stop.details}
+          </p>
         </div>
       `;
-      marker.bindPopup(popupContent);
+      marker.bindPopup(popupHtml, { maxWidth: 300, closeButton: false, offset: [0, -10] });
 
-      const card = document.getElementById(`step-card-${index}`);
-      if (card) {
-        card.addEventListener('click', () => {
-          map.flyTo(stop.coords, 6, { duration: 1.5 });
-          marker.openPopup();
-          highlightCard(index);
-        });
-      }
+      // Hover (mouseover / mouseout) to display details
+      marker.on('mouseover', function () {
+        this.openPopup();
+      });
+      marker.on('mouseout', function () {
+        this.closePopup();
+      });
+
+      // Click to focus and keep open
+      marker.on('click', () => {
+        map.flyTo(stop.coords, 6, { duration: 1.2 });
+      });
     });
 
-    // Icon kiện hàng chuyển động
-    const cargoIcon = L.divIcon({
-      className: 'cargo-icon',
+    // Cotton Boll SVG for moving marker
+    const cottonBollSvg = `
+      <svg viewBox="0 0 48 48" class="w-full h-full drop-shadow-[0_4px_10px_rgba(255,255,255,0.45)]" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 40 C20 44 14 39 12 33 C18 36 22 34 24 30 C26 34 30 36 36 33 C34 39 28 44 24 40 Z" fill="#855938" />
+        <path d="M12 28 C6 24 9 17 14 18 C11 22 14 26 18 26 C15 28 13 28 12 28 Z" fill="#6d4629" />
+        <path d="M36 28 C42 24 39 17 34 18 C37 22 34 26 30 26 C33 28 35 28 36 28 Z" fill="#6d4629" />
+        <circle cx="24" cy="20" r="10.5" fill="#e2e8f0" />
+        <circle cx="17" cy="21" r="8.5" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.8" />
+        <circle cx="31" cy="21" r="8.5" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.8" />
+        <circle cx="24" cy="14" r="8" fill="#ffffff" stroke="#f1f5f9" stroke-width="0.8" />
+        <circle cx="24" cy="23" r="7.5" fill="#ffffff" />
+        <path d="M21 16 Q24 19 21 23" stroke="#cbd5e1" stroke-width="0.8" fill="none" stroke-linecap="round" />
+        <path d="M27 16 Q24 19 27 23" stroke="#cbd5e1" stroke-width="0.8" fill="none" stroke-linecap="round" />
+      </svg>
+    `;
+
+    const cottonIcon = L.divIcon({
+      className: 'cotton-marker',
       html: `
-        <div class="w-8 h-8 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center shadow-lg shadow-amber-400/50 border-2 border-white text-xs">
-          <i class="fa-solid fa-box font-bold"></i>
+        <div class="relative flex items-center justify-center w-10 h-10 -ml-1 -mt-1 transition-transform hover:scale-125">
+          <div class="absolute inset-0 rounded-full bg-white/25 blur-sm animate-ping"></div>
+          ${cottonBollSvg}
         </div>
       `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
+      iconSize: [40, 40],
+      iconAnchor: [20, 20]
     });
 
-    const cargoMarker = L.marker(fullRouteCoords[0], { icon: cargoIcon, zIndexOffset: 1000 }).addTo(map);
+    const cargoMarker = L.marker(fullRouteCoords[0], { icon: cottonIcon, zIndexOffset: 1000 }).addTo(map);
 
-    // Animation vòng lặp chuyển động
+    // Cumulative indices for stage transitions
+    const cumLengths = [
+      seg1.length,
+      seg1.length + seg2.length - 1,
+      seg1.length + seg2.length + seg3.length - 2,
+      seg1.length + seg2.length + seg3.length + seg4.length - 3,
+      fullRouteCoords.length
+    ];
+
     let animationFrameId = null;
     let isPlaying = false;
     let progress = 0;
-    let speedMultiplier = 1;
+    let speedMultiplier = 0.2;
+    const totalPoints = fullRouteCoords.length;
+
+    // Elements for left status card
+    const elActiveBadge = document.getElementById('activeTierBadge');
+    const elFromTier = document.getElementById('statusFromTier');
+    const elFromPlace = document.getElementById('statusFromPlace');
+    const elToTier = document.getElementById('statusToTier');
+    const elToPlace = document.getElementById('statusToPlace');
+
+    function updateStatusBox(currentPointIndex) {
+      let activeLeg = 0;
+
+      for (let i = 0; i < cumLengths.length; i++) {
+        const start = i === 0 ? 0 : cumLengths[i - 1];
+        const end = cumLengths[i] - 1;
+        if (currentPointIndex >= start && currentPointIndex <= end) {
+          activeLeg = i;
+          break;
+        }
+      }
+
+      const fromNode = STOPS[activeLeg];
+      const toNode = STOPS[activeLeg + 1];
+
+      elActiveBadge.innerText = `${fromNode.tag.split(' ')[0]} ➔ ${toNode.tag.split(' ')[0]}`;
+      elFromTier.innerText = `${fromNode.tier} (${fromNode.company})`;
+      elFromPlace.innerText = fromNode.location;
+
+      elToTier.innerText = `${toNode.tier} (${toNode.company})`;
+      elToPlace.innerText = toNode.location;
+    }
 
     function animateMovement() {
       if (!isPlaying) return;
 
-      progress += 0.0018 * speedMultiplier;
+      progress += 0.0012 * speedMultiplier;
       if (progress >= 1) progress = 0;
 
-      const totalPoints = fullRouteCoords.length;
       const indexFloat = progress * (totalPoints - 1);
       const currentIndex = Math.floor(indexFloat);
       const nextIndex = Math.min(currentIndex + 1, totalPoints - 1);
@@ -408,33 +582,12 @@
       const currentLng = p1[1] + (p2[1] - p1[1]) * subRatio;
 
       cargoMarker.setLatLng([currentLat, currentLng]);
-
-      if (progress < segment1Coords.length / fullRouteCoords.length) {
-        highlightCard(0);
-        document.getElementById('currentMilestoneLabel').innerText = "Chặng 1: Mỹ ➔ TQ";
-      } else {
-        highlightCard(1);
-        document.getElementById('currentMilestoneLabel').innerText = "Chặng 2: TQ ➔ VN";
-      }
+      updateStatusBox(currentIndex);
 
       animationFrameId = requestAnimationFrame(animateMovement);
     }
 
-    function highlightCard(activeIdx) {
-      [0, 1, 2].forEach(i => {
-        const c = document.getElementById(`step-card-${i}`);
-        if (!c) return;
-        if (i === activeIdx) {
-          c.classList.add('border-sky-500/50', 'bg-sky-500/10');
-          c.classList.remove('border-slate-800', 'bg-slate-800/40');
-        } else {
-          c.classList.remove('border-sky-500/50', 'bg-sky-500/10');
-          c.classList.add('border-slate-800', 'bg-slate-800/40');
-        }
-      });
-    }
-
-    // Nút Play / Pause
+    // Play / Pause controls
     const btnPlay = document.getElementById('btnPlay');
     const playIcon = document.getElementById('playIcon');
     const playText = document.getElementById('playText');
@@ -443,22 +596,22 @@
       isPlaying = !isPlaying;
       if (isPlaying) {
         playIcon.classList.replace('fa-play', 'fa-pause');
-        playText.innerText = "Tạm Dừng";
+        playText.innerText = "Pause";
         animateMovement();
       } else {
         playIcon.classList.replace('fa-pause', 'fa-play');
-        playText.innerText = "Tiếp Tục";
+        playText.innerText = "Resume";
         cancelAnimationFrame(animationFrameId);
       }
     });
 
-    // Nút xem toàn cảnh
+    // Overview reset
     document.getElementById('btnReset').addEventListener('click', () => {
       const bounds = L.latLngBounds(fullRouteCoords);
       map.fitBounds(bounds, { padding: [60, 60] });
     });
 
-    // Nút tốc độ
+    // Speed controls
     document.querySelectorAll('.speed-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.speed-btn').forEach(b => {
@@ -471,11 +624,58 @@
       });
     });
 
-    // Khởi tạo chuẩn xác khi trang tải xong
+    // Product Picture Upload Logic (Supports localStorage caching)
+    const productImgInput = document.getElementById('productImgInput');
+    const emptyImagePrompt = document.getElementById('emptyImagePrompt');
+    const imagePreviewBox = document.getElementById('imagePreviewBox');
+    const productImageElement = document.getElementById('productImageElement');
+
+    function displayProductImage(dataUrl) {
+      productImageElement.src = dataUrl;
+      emptyImagePrompt.classList.add('hidden');
+      imagePreviewBox.classList.remove('hidden');
+    }
+
+    function removeProductImage() {
+      productImgInput.value = '';
+      productImageElement.src = '';
+      imagePreviewBox.classList.add('hidden');
+      emptyImagePrompt.classList.remove('hidden');
+      localStorage.removeItem('saved_product_image_1MG3058');
+    }
+
+    if (productImgInput) {
+      productImgInput.addEventListener('change', function(e) {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            const dataUrl = evt.target.result;
+            displayProductImage(dataUrl);
+            try {
+              localStorage.setItem('saved_product_image_1MG3058', dataUrl);
+            } catch (err) {
+              // Handle quota exceeded if file is excessively large
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    // Window load handler
     window.onload = function() {
       map.invalidateSize();
       const bounds = L.latLngBounds(fullRouteCoords);
       map.fitBounds(bounds, { padding: [50, 50] });
+
+      updateStatusBox(0);
+
+      // Restore saved product picture from localStorage if present
+      const cachedImg = localStorage.getItem('saved_product_image_1MG3058');
+      if (cachedImg) {
+        displayProductImage(cachedImg);
+      }
 
       setTimeout(() => {
         map.invalidateSize();
